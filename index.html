@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador de Vacaciones</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #343a40;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+        }
+        .counter {
+            font-size: 3rem;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cuenta Regresiva para Vacaciones</h1>
+        <div id="counter" class="counter"></div>
+    </div>
+    <script>
+        // Establece la fecha de destino (19 de diciembre)
+        const targetDate = new Date('December 19, 2024 00:00:00').getTime();
+
+        // Actualiza la cuenta regresiva cada segundo
+        const interval = setInterval(function() {
+            // Obtén la fecha y hora actual
+            const now = new Date().getTime();
+
+            // Calcula la diferencia entre la fecha de destino y la fecha actual
+            const distance = targetDate - now;
+
+            // Calcula los días, horas, minutos y segundos restantes
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Muestra el resultado en el elemento con id "counter"
+            document.getElementById('counter').innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+            // Si la cuenta regresiva ha terminado, muestra un mensaje
+            if (distance < 0) {
+                clearInterval(interval);
+                document.getElementById('counter').innerHTML = "¡Felices Vacaciones!";
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
