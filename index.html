@@ -56,6 +56,7 @@
             display: none;
         }
     </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2125166334282472" crossorigin="anonymous"></script>
     <script async custom-element="amp-auto-ads"
         src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
 </head>
@@ -64,7 +65,15 @@
         <h1>Gana Dinero viendo Anuncios</h1>
         <!-- Contenedor del anuncio -->
         <div class="ad-container" id="ad-container">
-            <iframe id="ad-frame" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" allow="autoplay; encrypted-media"></iframe>
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-2125166334282472"
+                 data-ad-slot="1234567890"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
         </div>
         <button onclick="claimReward()">Reclamar Recompensa</button>
         <div id="reward">Recompensa: $0.00 MX</div>
@@ -79,23 +88,20 @@
 
             function claimReward() {
                 document.getElementById('ad-container').style.display = 'block';
-                const adFrame = document.getElementById('ad-frame');
-                adFrame.onload = () => {
-                    const adDuration = 5000; // Duración del anuncio en milisegundos (ajusta según sea necesario)
-                    setTimeout(() => {
-                        document.getElementById('ad-container').style.display = 'none';
-                        if (adsWatched === 0) {
-                            reward += 0.10;
-                        } else {
-                            reward += 0.05;
-                        }
-                        adsWatched++;
-                        document.getElementById('reward').textContent = `Recompensa: $${reward.toFixed(2)} MX`;
-                        if (reward >= 5.00) {
-                            document.getElementById('withdraw-button').style.display = 'block';
-                        }
-                    }, adDuration);
-                };
+                const adFrame = document.getElementById('ad-container');
+                setTimeout(() => {
+                    document.getElementById('ad-container').style.display = 'none';
+                    if (adsWatched === 0) {
+                        reward += 0.10;
+                    } else {
+                        reward += 0.05;
+                    }
+                    adsWatched++;
+                    document.getElementById('reward').textContent = `Recompensa: $${reward.toFixed(2)} MX`;
+                    if (reward >= 5.00) {
+                        document.getElementById('withdraw-button').style.display = 'block';
+                    }
+                }, 30000); // Duración del anuncio (ajusta según sea necesario)
             }
 
             function withdrawReward() {
