@@ -4,36 +4,197 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Red Social de Videos</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .form {
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            display: none; /* Se ocultan inicialmente */
+        }
+
+        .form.active {
+            display: block; /* Se mostrará cuando se active */
+        }
+
+        h2, h3 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        input[type="text"], input[type="password"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #333;
+            color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        #video-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: scroll;
+        }
+
+        .video-upload {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        #videos {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #videos .video {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .video video {
+            width: 100%;
+            max-height: 500px;
+            border-radius: 10px;
+        }
+
+        .video .actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .video .actions button {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div id="registration-form" class="form">
-            <h2>Registro</h2>
-            <input type="text" id="register-username" placeholder="Nombre de usuario" required>
-            <input type="password" id="register-password" placeholder="Contraseña" required>
-            <button onclick="register()">Registrar</button>
-            <p>¿Ya tienes una cuenta? <a href="#" onclick="showLogin()">Iniciar sesión</a></p>
+    <div class="form" id="registration-form">
+        <h2>Registro</h2>
+        <input type="text" placeholder="Nombre de usuario">
+        <input type="password" placeholder="Contraseña">
+        <button onclick="showVideoContainer()">Registrar</button>
+        <p>¿Ya tienes una cuenta? <a href="#" onclick="showLoginForm()">Iniciar sesión</a></p>
+    </div>
+    <div class="form" id="login-form">
+        <h2>Iniciar sesión</h2>
+        <input type="text" placeholder="Nombre de usuario">
+        <input type="password" placeholder="Contraseña">
+        <button onclick="showVideoContainer()">Iniciar sesión</button>
+        <p>¿No tienes una cuenta? <a href="#" onclick="showRegisterForm()">Regístrate</a></p>
+    </div>
+    <div id="video-container">
+        <div class="video-upload">
+            <h3>Compartir Video</h3>
+            <input type="file" accept="video/*">
+            <button>Compartir</button>
         </div>
-        <div id="login-form" class="form" style="display:none;">
-            <h2>Iniciar sesión</h2>
-            <input type="text" id="login-username" placeholder="Nombre de usuario" required>
-            <input type="password" id="login-password" placeholder="Contraseña" required>
-            <button onclick="login()">Iniciar sesión</button>
-            <p>¿No tienes una cuenta? <a href="#" onclick="showRegister()">Regístrate</a></p>
-        </div>
-        <div id="profile" class="form" style="display:none;">
-            <h2>Bienvenido, <span id="user-name"></span></h2>
-            <button onclick="logout()">Cerrar sesión</button>
-            <div id="video-section">
-                <h3>Compartir Video</h3>
-                <input type="file" id="video-file" accept="video/*">
-                <button onclick="shareVideo()">Compartir</button>
-                <h3>Videos Compartidos</h3>
-                <div id="videos"></div>
+        <div id="videos">
+            <!-- Aquí se incluirán los videos subidos -->
+            <div class="video">
+                <video controls>
+                    <source src="video1.mp4" type="video/mp4">
+                    Tu navegador no soporta la etiqueta de video.
+                </video>
+                <div class="actions">
+                    <button>👍 Me gusta</button>
+                    <button>💬 Comentar</button>
+                    <button>🔗 Compartir</button>
+                </div>
+            </div>
+            <div class="video">
+                <video controls>
+                    <source src="video2.mp4" type="video/mp4">
+                    Tu navegador no soporta la etiqueta de video.
+                </video>
+                <div class="actions">
+                    <button>👍 Me gusta</button>
+                    <button>💬 Comentar</button>
+                    <button>🔗 Compartir</button>
+                </div>
             </div>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        function showRegisterForm() {
+            document.getElementById('registration-form').classList.add('active');
+            document.getElementById('login-form').classList.remove('active');
+            document.getElementById('video-container').style.display = 'none';
+        }
+
+        function showLoginForm() {
+            document.getElementById('login-form').classList.add('active');
+            document.getElementById('registration-form').classList.remove('active');
+            document.getElementById('video-container').style.display = 'none';
+        }
+
+        function showVideoContainer() {
+            document.getElementById('registration-form').classList.remove('active');
+            document.getElementById('login-form').classList.remove('active');
+            document.getElementById('video-container').style.display = 'block';
+        }
+
+        // Inicializar mostrando el formulario de inicio de sesión
+        showLoginForm();
+    </script>
 </body>
 </html>
