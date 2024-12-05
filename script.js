@@ -1,13 +1,13 @@
 function showRegister() {
     document.getElementById('registration-form').style.display = 'block';
     document.getElementById('login-form').style.display = 'none';
-    document.getElementById('profile').style.display = 'none';
+    document.getElementById('video-container').style.display = 'none';
 }
 
 function showLogin() {
     document.getElementById('registration-form').style.display = 'none';
     document.getElementById('login-form').style.display = 'block';
-    document.getElementById('profile').style.display = 'none';
+    document.getElementById('video-container').style.display = 'none';
 }
 
 function register() {
@@ -30,7 +30,7 @@ function login() {
 
     if (localStorage.getItem(username) === password) {
         localStorage.setItem('loggedInUser', username);
-        showProfile(username);
+        showVideoContainer(username);
     } else {
         alert('Nombre de usuario o contraseña incorrectos.');
     }
@@ -41,18 +41,18 @@ function logout() {
     showLogin();
 }
 
-function showProfile(username) {
+function showVideoContainer(username) {
     document.getElementById('user-name').innerText = username;
     document.getElementById('login-form').style.display = 'none';
     document.getElementById('registration-form').style.display = 'none';
-    document.getElementById('profile').style.display = 'block';
+    document.getElementById('video-container').style.display = 'block';
     loadVideos();
 }
 
 window.onload = function() {
     const loggedInUser = localStorage.getItem('loggedInUser');
     if (loggedInUser) {
-        showProfile(loggedInUser);
+        showVideoContainer(loggedInUser);
     } else {
         showLogin();
     }
@@ -68,21 +68,10 @@ function shareVideo() {
     const reader = new FileReader();
     reader.onload = function(e) {
         let videos = JSON.parse(localStorage.getItem('videos')) || [];
-        videos.push({ user: localStorage.getItem('loggedInUser'), data: e.target.result });
+        videos.push({ user: localStorage.getItem('loggedInUser'), data: e.target.result, likes: 0, comments: [] });
         localStorage.setItem('videos', JSON.stringify(videos));
         document.getElementById('video-file').value = '';
         loadVideos();
     };
     reader.readAsDataURL(videoFile);
-}
-
-function loadVideos() {
-    const videosDiv = document.getElementById('videos');
-    videosDiv.innerHTML = '';
-    const videos = JSON.parse(localStorage.getItem('videos')) || [];
-    videos.forEach(video => {
-        const videoElement = document.createElement('div');
-        videoElement.innerHTML = `<p><strong>${video.user}</strong> compartió:</p><video src="${video.data}" controls></video>`;
-        videosDiv.appendChild(videoElement);
-    });
 }
