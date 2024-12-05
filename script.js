@@ -1,3 +1,4 @@
+
 function showRegister() {
     document.getElementById('registration-form').style.display = 'block';
     document.getElementById('login-form').style.display = 'none';
@@ -75,3 +76,24 @@ function shareVideo() {
     };
     reader.readAsDataURL(videoFile);
 }
+
+function loadVideos() {
+    const videosDiv = document.getElementById('videos');
+    videosDiv.innerHTML = '';
+    const videos = JSON.parse(localStorage.getItem('videos')) || [];
+    videos.forEach((video, index) => {
+        const videoElement = document.createElement('div');
+        videoElement.className = 'video';
+        videoElement.innerHTML = `
+            <p><strong>${video.user}</strong> compartió:</p>
+            <video src="${video.data}" controls></video>
+            <div class="actions">
+                <button onclick="likeVideo(${index})">👍 ${video.likes}</button>
+                <button onclick="showComments(${index})">💬 Comentarios (${video.comments.length})</button>
+                <button onclick="shareVideo(${index})">🔗 Compartir</button>
+            </div>
+            <div id="comments-${index}" class="comments" style="display: none;">
+                <textarea id="comment-input-${index}" placeholder="Escribe un comentario..."></textarea>
+                <button onclick="addComment(${index})">Enviar</button>
+                <div id="comment-list-${index}"></div>
+[_{{{CITATION{{{_1{](https://github.com/la9una/web/tree/ba1073ae044ebb7b538a3b13f0f9598f7c410bb6/docs%2Fbootstrap%2Falignci.md)[_{{{CITATION{{{_2{](https://github.com/CLONATORE/markdowns/tree/82cfb03683ceb807a7091de48045e6a7485acd72/webpack.md)
