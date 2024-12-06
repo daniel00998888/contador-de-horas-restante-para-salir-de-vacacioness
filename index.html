@@ -3,198 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Red Social de Videos</title>
+    <title>Contador para Vacaciones</title>
     <style>
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-            background-color: #111;
-            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
         }
 
-        .form {
-            background-color: #222;
+        .container {
+            text-align: center;
             padding: 20px;
+            background-color: #fff;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            width: 80%;
-            max-width: 400px;
-            text-align: center;
-            display: none; /* Se ocultan inicialmente */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        .form.active {
-            display: block; /* Se mostrará cuando se active */
-        }
-
-        h2, h3 {
+        h1 {
             margin-bottom: 20px;
-            font-size: 24px;
         }
 
-        input[type="text"], input[type="password"], input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #444;
-            border-radius: 5px;
-            background-color: #333;
-            color: #fff;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        a {
-            color: #4CAF50;
-            text-decoration: none;
-        }
-
-        #video-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-y: scroll;
-        }
-
-        .video-upload {
-            background-color: #333;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            width: 80%;
-            max-width: 600px;
-            text-align: center;
-        }
-
-        #videos {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #videos .video {
-            width: 100%;
-            max-width: 600px;
-            margin-bottom: 20px;
-            background-color: #333;
-            padding: 10px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .video video {
-            width: 100%;
-            max-height: 500px;
-            border-radius: 10px;
-        }
-
-        .video .actions {
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-around;
-        }
-
-        .video .actions button {
-            padding: 5px 10px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
+        .countdown {
+            font-size: 2em;
         }
     </style>
 </head>
 <body>
-    <div class="form" id="registration-form">
-        <h2>Registro</h2>
-        <input type="text" placeholder="Nombre de usuario">
-        <input type="password" placeholder="Contraseña">
-        <button onclick="showVideoContainer()">Registrar</button>
-        <p>¿Ya tienes una cuenta? <a href="#" onclick="showLoginForm()">Iniciar sesión</a></p>
+    <div class="container">
+        <h1>Tiempo Restante para las Vacaciones</h1>
+        <div class="countdown" id="countdown"></div>
     </div>
-    <div class="form" id="login-form">
-        <h2>Iniciar sesión</h2>
-        <input type="text" placeholder="Nombre de usuario">
-        <input type="password" placeholder="Contraseña">
-        <button onclick="showVideoContainer()">Iniciar sesión</button>
-        <p>¿No tienes una cuenta? <a href="#" onclick="showRegisterForm()">Regístrate</a></p>
-    </div>
-    <div id="video-container">
-        <div class="video-upload">
-            <h3>Compartir Video</h3>
-            <input type="file" accept="video/*">
-            <button>Compartir</button>
-        </div>
-        <div id="videos">
-            <!-- Aquí se incluirán los videos subidos -->
-            <div class="video">
-                <video controls>
-                    <source src="video1.mp4" type="video/mp4">
-                    Tu navegador no soporta la etiqueta de video.
-                </video>
-                <div class="actions">
-                    <button>👍 Me gusta</button>
-                    <button>💬 Comentar</button>
-                    <button>🔗 Compartir</button>
-                </div>
-            </div>
-            <div class="video">
-                <video controls>
-                    <source src="video2.mp4" type="video/mp4">
-                    Tu navegador no soporta la etiqueta de video.
-                </video>
-                <div class="actions">
-                    <button>👍 Me gusta</button>
-                    <button>💬 Comentar</button>
-                    <button>🔗 Compartir</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        function showRegisterForm() {
-            document.getElementById('registration-form').classList.add('active');
-            document.getElementById('login-form').classList.remove('active');
-            document.getElementById('video-container').style.display = 'none';
+        function updateCountdown() {
+            const vacationDate = new Date('December 18, 2024 13:00:00').getTime();
+            const now = new Date().getTime();
+            const distance = vacationDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+            if (distance < 0) {
+                clearInterval(interval);
+                document.getElementById('countdown').innerHTML = '¡Ya estás de vacaciones!';
+            }
         }
 
-        function showLoginForm() {
-            document.getElementById('login-form').classList.add('active');
-            document.getElementById('registration-form').classList.remove('active');
-            document.getElementById('video-container').style.display = 'none';
-        }
-
-        function showVideoContainer() {
-            document.getElementById('registration-form').classList.remove('active');
-            document.getElementById('login-form').classList.remove('active');
-            document.getElementById('video-container').style.display = 'block';
-        }
-
-        // Inicializar mostrando el formulario de inicio de sesión
-        showLoginForm();
+        const interval = setInterval(updateCountdown, 1000);
+        updateCountdown(); // Para inicializar el contador inmediatamente
     </script>
 </body>
 </html>
