@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tres en Raya</title>
+    <title>Página de Juegos en Línea</title>
     <style>
         body, html {
             margin: 0;
@@ -32,7 +32,7 @@
             margin: 20px auto;
         }
 
-        .cell {
+        .cell, .btn {
             width: 100px;
             height: 100px;
             background-color: #e1e1e1;
@@ -41,14 +41,8 @@
             align-items: center;
             font-size: 2em;
             cursor: pointer;
-        }
-
-        .cell.x {
-            color: #f44336;
-        }
-
-        .cell.o {
-            color: #4CAF50;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
 
         #message {
@@ -65,24 +59,59 @@
 </head>
 <body>
     <div class="container">
-        <h1>Tres en Raya</h1>
-        <div class="board" id="board">
-            <div class="cell" data-index="0"></div>
-            <div class="cell" data-index="1"></div>
-            <div class="cell" data-index="2"></div>
-            <div class="cell" data-index="3"></div>
-            <div class="cell" data-index="4"></div>
-            <div class="cell" data-index="5"></div>
-            <div class="cell" data-index="6"></div>
-            <div class="cell" data-index="7"></div>
-            <div class="cell" data-index="8"></div>
+        <h1>Página de Juegos en Línea</h1>
+        <div id="register">
+            <input type="text" id="username" placeholder="Nombre de usuario">
+            <button onclick="register()">Empezar a jugar</button>
         </div>
-        <div id="message"></div>
-        <button onclick="resetGame()">Reiniciar Juego</button>
+        <div id="menu" style="display: none;">
+            <button onclick="findGame()">Jugar en línea</button>
+        </div>
+        <div id="game" style="display: none;">
+            <div class="board" id="board">
+                <!-- Celdas del tablero del juego Tres en Raya -->
+            </div>
+            <div id="message"></div>
+            <button onclick="resetGame()">Reiniciar Juego</button>
+        </div>
     </div>
     <script>
         let currentPlayer = 'x';
         let board = Array(9).fill(null);
+        let username = null;
+
+        function register() {
+            username = document.getElementById('username').value;
+            if (username) {
+                document.getElementById('register').style.display = 'none';
+                document.getElementById('menu').style.display = 'block';
+            }
+        }
+
+        function findGame() {
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            setupGame('Tres en Raya');
+        }
+
+        function setupGame(game) {
+            if (game === 'Tres en Raya') {
+                document.getElementById('board').innerHTML = `
+                    <div class="cell" data-index="0"></div>
+                    <div class="cell" data-index="1"></div>
+                    <div class="cell" data-index="2"></div>
+                    <div class="cell" data-index="3"></div>
+                    <div class="cell" data-index="4"></div>
+                    <div class="cell" data-index="5"></div>
+                    <div class="cell" data-index="6"></div>
+                    <div class="cell" data-index="7"></div>
+                    <div class="cell" data-index="8"></div>
+                `;
+                document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleClick));
+                updateBoard();
+            }
+            // Aquí se pueden agregar otros juegos
+        }
 
         function updateBoard() {
             document.querySelectorAll('.cell').forEach((cell, index) => {
@@ -137,8 +166,10 @@
             document.getElementById('message').innerText = '';
         }
 
-        document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleClick));
-        updateBoard();
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleClick));
+            updateBoard();
+        });
     </script>
 </body>
 </html>
