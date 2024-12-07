@@ -22,9 +22,7 @@
             padding: 20px;
             background-color: #fff;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
+            box-shadow: 0 0 10px rgba(0, 0, 0, 1
         .board {
             display: grid;
             grid-template-columns: repeat(3, 100px);
@@ -80,8 +78,8 @@
         let currentPlayer = 'x';
         let board = Array(9).fill(null);
         let username = null;
-        let waitingForPlayer = false;
         let opponent = null;
+        let gameId = null;
 
         function register() {
             username = document.getElementById('username').value;
@@ -103,7 +101,6 @@
             } else {
                 waitingPlayers.push(username);
                 localStorage.setItem('waitingPlayers', JSON.stringify(waitingPlayers));
-                waitingForPlayer = true;
                 checkForOpponent();
             }
         }
@@ -111,17 +108,11 @@
         function checkForOpponent() {
             const interval = setInterval(() => {
                 let waitingPlayers = JSON.parse(localStorage.getItem('waitingPlayers')) || [];
-                if (waitingPlayers[0] === username) {
-                    if (waitingPlayers.length > 1) {
-                        opponent = waitingPlayers[1];
-                        waitingPlayers = waitingPlayers.filter(player => player !== opponent && player !== username);
-                        localStorage.setItem('waitingPlayers', JSON.stringify(waitingPlayers));
-                        clearInterval(interval);
-                        startGameWithOpponent(opponent);
-                    }
-                } else {
+                if (waitingPlayers.length > 1) {
+                    opponent = waitingPlayers.shift();
+                    localStorage.setItem('waitingPlayers', JSON.stringify(waitingPlayers));
                     clearInterval(interval);
-                    startGameWithOpponent(waitingPlayers[0]);
+                    startGameWithOpponent(opponent);
                 }
             }, 1000);
         }
@@ -149,7 +140,6 @@
                 document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleClick));
                 updateBoard();
             }
-            // Aquí se pueden agregar otros juegos
         }
 
         function updateBoard() {
