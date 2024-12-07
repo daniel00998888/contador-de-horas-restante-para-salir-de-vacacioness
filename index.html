@@ -58,6 +58,9 @@
             text-align: left;
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
 </head>
 <body>
     <div class="container">
@@ -84,6 +87,21 @@
         </div>
     </div>
     <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAFndDY-EehQ4ZQujnkVpr2yllf9efjN8Y",
+            authDomain: "aplicacion-de-mensajes-fd642.firebaseapp.com",
+            databaseURL: "",
+            projectId: "aplicacion-de-mensajes-fd642",
+            storageBucket: "aplicacion-de-mensajes-fd642.firebasestorage.app",
+            messagingSenderId: "61201561890",
+            appId: "1:61201561890:web:70ed4b05736ab91d5b0d7b"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const database = firebase.database();
+
         let username = null;
         let friend = null;
         let chatId = null;
@@ -91,11 +109,8 @@
         function register() {
             username = document.getElementById('username').value;
             if (username) {
-                const users = JSON.parse(localStorage.getItem('users')) || [];
-                if (!users.find(user => user.username === username)) {
-                    users.push({ username });
-                    localStorage.setItem('users', JSON.stringify(users));
-                }
+                const usersRef = database.ref('users');
+                usersRef.push({ username });
                 document.getElementById('register').style.display = 'none';
                 document.getElementById('menu').style.display = 'block';
                 listenForInvites();
@@ -108,44 +123,57 @@
 
         function sendInvite() {
             const friendUsername = document.getElementById('friend-username').value;
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const friend = users.find(user => user.username === friendUsername);
-
-            if (friend) {
-                const invitations = JSON.parse(localStorage.getItem('invitations')) || [];
-                invitations.push({ from: username, to: friendUsername });
-                localStorage.setItem('invitations', JSON.stringify(invitations));
-                alert('Invitación enviada');
-            } else {
-                alert('Usuario no encontrado');
-            }
+            const usersRef = database.ref('users');
+            usersRef.orderByChild('username').equalTo(friendUsername).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    const friendKey = Object.keys(snapshot.val())[0];
+                    database.ref(`invitations/${friendKey}`).set({
+                        from: username
+                    });
+                    alert('Invitación enviada');
+                } else {
+                    alert('Usuario no encontrado');
+                }
+            });
         }
 
         function listenForInvites() {
-            setInterval(() => {
-                const invitations = JSON.parse(localStorage.getItem('invitations')) || [];
-                const invitation = invitations.find(invite => invite.to === username);
-
-                if (invitation) {
-                    document.getElementById('notification-message').innerText = `${invitation.from} te ha invitado a chatear`;
-                    document.getElementById('notification').style.display = 'block';
+            const usersRef = database.ref('users');
+            usersRef.orderByChild('username').equalTo(username).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    const userKey = Object.keys(snapshot.val())[0];
+                    database.ref(`invitations/${userKey}`).on('value', snapshot => {
+                        if (snapshot.exists()) {
+                            const invitation = snapshot.val();
+                            document.getElementById('notification-message').innerText = `${invitation.from} te ha invitado a chatear`;
+                            document.getElementById('notification').style.display = 'block';
+                        }
+                    });
                 }
-            }, 1000);
+            });
         }
 
         function acceptInvite() {
-            const invitations = JSON.parse(localStorage.getItem('invitations')) || [];
-            const invitation = invitations.find(invite => invite.to === username);
-            if (invitation) {
-                chatId = new Date().getTime();  // Simulación de un ID de chat único
+            const usersRef = database.ref('users');
+            usersRef.orderByChild('username').equalTo(username).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    const userKey = Object.keys(snapshot.val())[0];
+                    database.ref(`invitations/${userKey}`).once('value', snapshot => {
+                        if (snapshot.exists()) {
+                            const invitation = snapshot.val();
+                            chatId = `${invitation.from}-${username}`;
 
-                localStorage.setItem('currentChat', JSON.stringify({ users: [invitation.from, username], chatId, messages: [] }));
+                            database.ref(`chats/${chatId}`).set({
+                                users: [invitation.from, username],
+                                messages: []
+                            });
 
-                const updatedInvitations = invitations.filter(invite => invite.to !== username);
-                localStorage.setItem('invitations', JSON.stringify(updatedInvitations));
-
-                startChatWithFriend(invitation.from);
-            }
+                            database.ref(`invitations/${userKey}`).remove();
+                            startChatWithFriend(invitation.from);
+                        }
+                    });
+                }
+            });
         }
 
         function startChatWithFriend(friendUsername) {
@@ -158,13 +186,11 @@
         }
 
         function listenToChatUpdates() {
-            setInterval(() => {
-                const currentChat = JSON.parse(localStorage.getItem('currentChat'));
-                if (currentChat && currentChat.users.includes(username)) {
-                    const messages = currentChat.messages;
-                    displayMessages(messages);
-                }
-            }, 1000);
+            const chatRef = database.ref(`chats/${chatId}`);
+            chatRef.on('value', snapshot => {
+                const chatData = snapshot.val();
+                displayMessages(chatData.messages);
+            });
         }
 
         function displayMessages(messages) {
@@ -182,14 +208,14 @@
             const messageInput = document.getElementById('message-input');
             const messageText = messageInput.value;
             if (messageText) {
-                const currentChat = JSON.parse(localStorage.getItem('currentChat'));
-                if (currentChat && currentChat.users.includes(username)) {
+                const chatRef = database.ref(`chats/${chatId}`);
+                chatRef.once('value', snapshot => {
+                    const chatData = snapshot.val();
                     const newMessage = { sender: username, text: messageText };
-                    currentChat.messages.push(newMessage);
-                    localStorage.setItem('currentChat', JSON.stringify(currentChat));
+                    chatData.messages.push(newMessage);
+                    chatRef.update({ messages: chatData.messages });
                     messageInput.value = '';
-                    displayMessages(currentChat.messages);
-                }
+                });
             }
         }
     </script>
