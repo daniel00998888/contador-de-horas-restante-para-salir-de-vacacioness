@@ -229,7 +229,7 @@
                     }
                 }
 
-                postList.appendChild(postItem);
+                postList.prepend(postItem);
             });
         }
 
@@ -246,6 +246,12 @@
                 showLoginForm();
             }
             loadPosts();
+        });
+
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'posts') {
+                loadPosts();
+            }
         });
     </script>
 </body>
