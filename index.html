@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Ahorcado</title>
+    <title>Tres en Raya</title>
     <style>
         body, html {
             margin: 0;
@@ -25,102 +25,120 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        .word {
-            font-size: 2em;
-            letter-spacing: 0.1em;
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 10px;
+            margin: 20px auto;
         }
 
-        .message {
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #e1e1e1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            cursor: pointer;
+        }
+
+        .cell.x {
+            color: #f44336;
+        }
+
+        .cell.o {
+            color: #4CAF50;
+        }
+
+        #message {
             margin-top: 20px;
             font-size: 1.2em;
         }
 
-        .letters {
+        button {
             margin-top: 20px;
-        }
-
-        .letter {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            line-height: 30px;
-            margin: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .letter.correct {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .letter.wrong {
-            background-color: #f44336;
-            color: white;
+            padding: 10px 20px;
+            font-size: 1em;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Juego de Ahorcado</h1>
-        <div class="word" id="word"></div>
-        <div class="message" id="message"></div>
-        <div class="letters" id="letters"></div>
+        <h1>Tres en Raya</h1>
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <div id="message"></div>
+        <button onclick="resetGame()">Reiniciar Juego</button>
     </div>
     <script>
-        const words = ["javascript", "html", "css", "programacion", "desarrollo"];
-        let selectedWord = words[Math.floor(Math.random() * words.length)];
-        let guessedLetters = [];
-        let wrongGuesses = 0;
+        let currentPlayer = 'x';
+        let board = Array(9).fill(null);
 
-        function displayWord() {
-            const wordContainer = document.getElementById('word');
-            wordContainer.innerHTML = selectedWord.split('').map(letter => guessedLetters.includes(letter) ? letter : '_').join(' ');
-        }
-
-        function displayLetters() {
-            const lettersContainer = document.getElementById('letters');
-            lettersContainer.innerHTML = '';
-            'abcdefghijklmnopqrstuvwxyz'.split('').forEach(letter => {
-                const letterElement = document.createElement('div');
-                letterElement.className = 'letter';
-                letterElement.innerText = letter;
-                letterElement.onclick = () => guessLetter(letter);
-                lettersContainer.appendChild(letterElement);
+        function updateBoard() {
+            document.querySelectorAll('.cell').forEach((cell, index) => {
+                cell.innerText = board[index];
+                cell.className = 'cell';
+                if (board[index]) {
+                    cell.classList.add(board[index]);
+                }
             });
         }
 
-        function guessLetter(letter) {
-            if (guessedLetters.includes(letter)) return;
-            guessedLetters.push(letter);
-            if (selectedWord.includes(letter)) {
-                document.querySelectorAll('.letter').forEach(el => {
-                    if (el.innerText === letter) el.classList.add('correct');
-                });
-            } else {
-                wrongGuesses++;
-                document.querySelectorAll('.letter').forEach(el => {
-                    if (el.innerText === letter) el.classList.add('wrong');
-                });
+        function checkWinner() {
+            const winningCombinations = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+
+            for (const combination of winningCombinations) {
+                const [a, b, c] = combination;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
             }
-            displayWord();
-            checkGameStatus();
+
+            return board.every(cell => cell) ? 'tie' : null;
         }
 
-        function checkGameStatus() {
-            const messageContainer = document.getElementById('message');
-            if (selectedWord.split('').every(letter => guessedLetters.includes(letter))) {
-                messageContainer.innerText = '¡Ganaste!';
-                document.querySelectorAll('.letter').forEach(el => el.onclick = null);
-            } else if (wrongGuesses >= 6) {
-                messageContainer.innerText = `Perdiste. La palabra era "${selectedWord}".`;
-                document.querySelectorAll('.letter').forEach(el => el.onclick = null);
+        function handleClick(event) {
+            const index = event.target.getAttribute('data-index');
+            if (!board[index] && !checkWinner()) {
+                board[index] = currentPlayer;
+                currentPlayer = currentPlayer === 'x' ? 'o' : 'x';
+                updateBoard();
+                const winner = checkWinner();
+                if (winner) {
+                    const message = winner === 'tie' ? '¡Empate!' : `¡${winner.toUpperCase()} gana!`;
+                    document.getElementById('message').innerText = message;
+                }
             }
         }
 
-        displayWord();
-        displayLetters();
+        function resetGame() {
+            board = Array(9).fill(null);
+            currentPlayer = 'x';
+            updateBoard();
+            document.getElementById('message').innerText = '';
+        }
+
+        document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleClick));
+        updateBoard();
     </script>
 </body>
 </html>
