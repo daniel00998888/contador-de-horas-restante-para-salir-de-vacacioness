@@ -68,17 +68,20 @@
             <button onclick="findGame()">Jugar en línea</button>
         </div>
         <div id="game" style="display: none;">
-            <div class="board" id="board">
-                <!-- Celdas del tablero del juego Tres en Raya -->
-            </div>
+            <div class="board" id="board"></div>
             <div id="message"></div>
             <button onclick="resetGame()">Reiniciar Juego</button>
+        </div>
+        <div id="waiting" style="display: none;">
+            <p>Emparejando con otra persona...</p>
         </div>
     </div>
     <script>
         let currentPlayer = 'x';
         let board = Array(9).fill(null);
         let username = null;
+        let waitingForPlayer = false;
+        let opponent = null;
 
         function register() {
             username = document.getElementById('username').value;
@@ -90,6 +93,42 @@
 
         function findGame() {
             document.getElementById('menu').style.display = 'none';
+            document.getElementById('waiting').style.display = 'block';
+
+            let waitingPlayers = JSON.parse(localStorage.getItem('waitingPlayers')) || [];
+            if (waitingPlayers.length > 0) {
+                opponent = waitingPlayers.shift();
+                localStorage.setItem('waitingPlayers', JSON.stringify(waitingPlayers));
+                startGameWithOpponent(opponent);
+            } else {
+                waitingPlayers.push(username);
+                localStorage.setItem('waitingPlayers', JSON.stringify(waitingPlayers));
+                waitingForPlayer = true;
+                checkForOpponent();
+            }
+        }
+
+        function checkForOpponent() {
+            const interval = setInterval(() => {
+                let waitingPlayers = JSON.parse(localStorage.getItem('waitingPlayers')) || [];
+                if (waitingPlayers[0] === username) {
+                    if (waitingPlayers.length > 1) {
+                        opponent = waitingPlayers[1];
+                        waitingPlayers = waitingPlayers.filter(player => player !== opponent && player !== username);
+                        localStorage.setItem('waitingPlayers', JSON.stringify(waitingPlayers));
+                        clearInterval(interval);
+                        startGameWithOpponent(opponent);
+                    }
+                } else {
+                    clearInterval(interval);
+                    startGameWithOpponent(waitingPlayers[0]);
+                }
+            }, 1000);
+        }
+
+        function startGameWithOpponent(opponentPlayer) {
+            opponent = opponentPlayer;
+            document.getElementById('waiting').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             setupGame('Tres en Raya');
         }
