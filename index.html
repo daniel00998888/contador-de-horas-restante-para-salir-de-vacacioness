@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Red Social Profesional</title>
+    <title>Juego de Ahorcado</title>
     <style>
         body, html {
             margin: 0;
@@ -18,246 +18,109 @@
         }
 
         .container {
+            text-align: center;
+            padding: 20px;
             background-color: #fff;
-            width: 80%;
-            max-width: 600px;
-            height: auto;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
         }
 
-        .form, .feed {
-            display: none;
+        .word {
+            font-size: 2em;
+            letter-spacing: 0.1em;
         }
 
-        .form-input, .form-textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
+        .message {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        .letters {
+            margin-top: 20px;
+        }
+
+        .letter {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            margin: 5px;
             border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .form-button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
             border-radius: 5px;
             cursor: pointer;
         }
 
-        .form-button:hover {
-            background-color: #45a049;
+        .letter.correct {
+            background-color: #4CAF50;
+            color: white;
         }
 
-        .post {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            background-color: #fafafa;
-        }
-
-        .post h3 {
-            margin: 0;
-            margin-bottom: 10px;
-        }
-
-        .post p, .post img, .post video {
-            margin: 0;
-            margin-bottom: 10px;
-        }
-
-        .post img, .post video {
-            max-width: 100%;
-            border-radius: 5px;
-        }
-
-        .post video {
-            controls: true;
+        .letter.wrong {
+            background-color: #f44336;
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="form" id="register-form">
-            <h2>Registro</h2>
-            <input type="text" id="register-username" class="form-input" placeholder="Nombre de usuario">
-            <input type="password" id="register-password" class="form-input" placeholder="Contraseña">
-            <button class="form-button" onclick="register()">Registrar</button>
-            <p>¿Ya tienes una cuenta? <a href="#" onclick="showLoginForm()">Iniciar sesión</a></p>
-        </div>
-        <div class="form" id="login-form">
-            <h2>Iniciar sesión</h2>
-            <input type="text" id="login-username" class="form-input" placeholder="Nombre de usuario">
-            <input type="password" id="login-password" class="form-input" placeholder="Contraseña">
-            <button class="form-button" onclick="login()">Iniciar sesión</button>
-            <p>¿No tienes una cuenta? <a href="#" onclick="showRegisterForm()">Regístrate</a></p>
-        </div>
-        <div class="form" id="post-form">
-            <h2>Crear Publicación</h2>
-            <textarea id="post-content" class="form-textarea" placeholder="Escribe tu publicación aquí..." rows="4"></textarea>
-            <input type="file" id="post-file" class="form-input" accept="image/*,video/*">
-            <button class="form-button" onclick="createPost()">Publicar</button>
-            <button class="form-button" onclick="logout()">Cerrar sesión</button>
-        </div>
-        <div class="feed" id="feed">
-            <h2>Publicaciones Recientes</h2>
-            <div id="post-list"></div>
-        </div>
+        <h1>Juego de Ahorcado</h1>
+        <div class="word" id="word"></div>
+        <div class="message" id="message"></div>
+        <div class="letters" id="letters"></div>
     </div>
-
     <script>
-        function showRegisterForm() {
-            document.getElementById('register-form').style.display = 'block';
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('post-form').style.display = 'none';
-            document.getElementById('feed').style.display = 'none';
+        const words = ["javascript", "html", "css", "programacion", "desarrollo"];
+        let selectedWord = words[Math.floor(Math.random() * words.length)];
+        let guessedLetters = [];
+        let wrongGuesses = 0;
+
+        function displayWord() {
+            const wordContainer = document.getElementById('word');
+            wordContainer.innerHTML = selectedWord.split('').map(letter => guessedLetters.includes(letter) ? letter : '_').join(' ');
         }
 
-        function showLoginForm() {
-            document.getElementById('register-form').style.display = 'none';
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('post-form').style.display = 'none';
-            document.getElementById('feed').style.display = 'none';
-        }
-
-        function showPostForm() {
-            document.getElementById('register-form').style.display = 'none';
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('post-form').style.display = 'block';
-            document.getElementById('feed').style.display = 'block';
-            loadPosts();
-        }
-
-        function register() {
-            const username = document.getElementById('register-username').value;
-            const password = document.getElementById('register-password').value;
-
-            if (username === '' || password === '') {
-                alert('Por favor, completa todos los campos.');
-                return;
-            }
-
-            let users = JSON.parse(localStorage.getItem('users')) || [];
-            users.push({ username, password });
-            localStorage.setItem('users', JSON.stringify(users));
-            alert('Registro exitoso. Ahora puedes iniciar sesión.');
-            showLoginForm();
-        }
-
-        function login() {
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const user = users.find(user => user.username === username && user.password === password);
-
-            if (user) {
-                localStorage.setItem('loggedInUser', username);
-                showPostForm();
-            } else {
-                alert('Nombre de usuario o contraseña incorrectos.');
-            }
-        }
-
-        function createPost() {
-            const content = document.getElementById('post-content').value;
-            const fileInput = document.getElementById('post-file');
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                const username = localStorage.getItem('loggedInUser');
-                let posts = JSON.parse(localStorage.getItem('posts')) || [];
-                const post = {
-                    username,
-                    content,
-                    fileType: file ? file.type : null,
-                    fileData: file ? e.target.result : null,
-                    timestamp: new Date()
-                };
-                posts.push(post);
-                localStorage.setItem('posts', JSON.stringify(posts));
-                document.getElementById('post-content').value = '';
-                fileInput.value = '';
-                loadPosts();
-                notifyAllUsers();
-            }
-
-            if (file) {
-                reader.readAsDataURL(file);
-            } else {
-                reader.onload();
-            }
-        }
-
-        function loadPosts() {
-            const posts = JSON.parse(localStorage.getItem('posts')) || [];
-            const postList = document.getElementById('post-list');
-
-            postList.innerHTML = '';
-
-            posts.forEach(post => {
-                const postItem = document.createElement('div');
-                postItem.className = 'post';
-
-                const postHeader = document.createElement('h3');
-                postHeader.innerText = `${post.username} - ${new Date(post.timestamp).toLocaleString()}`;
-                postItem.appendChild(postHeader);
-
-                if (post.content) {
-                    const postContent = document.createElement('p');
-                    postContent.innerText = post.content;
-                    postItem.appendChild(postContent);
-                }
-
-                if (post.fileData) {
-                    if (post.fileType.startsWith('image/')) {
-                        const img = document.createElement('img');
-                        img.src = post.fileData;
-                        postItem.appendChild(img);
-                    } else if (post.fileType.startsWith('video/')) {
-                        const video = document.createElement('video');
-                        video.src = post.fileData;
-                        video.controls = true;
-                        postItem.appendChild(video);
-                    }
-                }
-
-                postList.prepend(postItem);
+        function displayLetters() {
+            const lettersContainer = document.getElementById('letters');
+            lettersContainer.innerHTML = '';
+            'abcdefghijklmnopqrstuvwxyz'.split('').forEach(letter => {
+                const letterElement = document.createElement('div');
+                letterElement.className = 'letter';
+                letterElement.innerText = letter;
+                letterElement.onclick = () => guessLetter(letter);
+                lettersContainer.appendChild(letterElement);
             });
         }
 
-        function notifyAllUsers() {
-            window.localStorage.setItem('newPostNotification', Date.now());
-        }
-
-        function logout() {
-            localStorage.removeItem('loggedInUser');
-            showLoginForm();
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const loggedInUser = localStorage.getItem('loggedInUser');
-            if (loggedInUser) {
-                showPostForm();
+        function guessLetter(letter) {
+            if (guessedLetters.includes(letter)) return;
+            guessedLetters.push(letter);
+            if (selectedWord.includes(letter)) {
+                document.querySelectorAll('.letter').forEach(el => {
+                    if (el.innerText === letter) el.classList.add('correct');
+                });
             } else {
-                showLoginForm();
+                wrongGuesses++;
+                document.querySelectorAll('.letter').forEach(el => {
+                    if (el.innerText === letter) el.classList.add('wrong');
+                });
             }
-            loadPosts();
-        });
+            displayWord();
+            checkGameStatus();
+        }
 
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'newPostNotification') {
-                loadPosts();
+        function checkGameStatus() {
+            const messageContainer = document.getElementById('message');
+            if (selectedWord.split('').every(letter => guessedLetters.includes(letter))) {
+                messageContainer.innerText = '¡Ganaste!';
+                document.querySelectorAll('.letter').forEach(el => el.onclick = null);
+            } else if (wrongGuesses >= 6) {
+                messageContainer.innerText = `Perdiste. La palabra era "${selectedWord}".`;
+                document.querySelectorAll('.letter').forEach(el => el.onclick = null);
             }
-        });
+        }
+
+        displayWord();
+        displayLetters();
     </script>
 </body>
 </html>
