@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contador para Vacaciones</title>
+    <title>Red Social Profesional</title>
     <style>
         body, html {
             margin: 0;
@@ -18,48 +18,194 @@
         }
 
         .container {
-            text-align: center;
-            padding: 20px;
             background-color: #fff;
+            width: 80%;
+            max-width: 600px;
+            height: auto;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
         }
 
-        h1 {
-            margin-bottom: 20px;
+        .form, .feed {
+            display: none;
         }
 
-        .countdown {
-            font-size: 2em;
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .form-button:hover {
+            background-color: #45a049;
+        }
+
+        .post {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #fafafa;
+        }
+
+        .post h3 {
+            margin: 0;
+            margin-bottom: 10px;
+        }
+
+        .post p {
+            margin: 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Tiempo Restante para las Vacaciones</h1>
-        <div class="countdown" id="countdown"></div>
+        <div class="form" id="register-form">
+            <h2>Registro</h2>
+            <input type="text" id="register-username" class="form-input" placeholder="Nombre de usuario">
+            <input type="password" id="register-password" class="form-input" placeholder="Contraseña">
+            <button class="form-button" onclick="register()">Registrar</button>
+            <p>¿Ya tienes una cuenta? <a href="#" onclick="showLoginForm()">Iniciar sesión</a></p>
+        </div>
+        <div class="form" id="login-form">
+            <h2>Iniciar sesión</h2>
+            <input type="text" id="login-username" class="form-input" placeholder="Nombre de usuario">
+            <input type="password" id="login-password" class="form-input" placeholder="Contraseña">
+            <button class="form-button" onclick="login()">Iniciar sesión</button>
+            <p>¿No tienes una cuenta? <a href="#" onclick="showRegisterForm()">Regístrate</a></p>
+        </div>
+        <div class="form" id="post-form">
+            <h2>Crear Publicación</h2>
+            <textarea id="post-content" class="form-input" placeholder="Escribe tu publicación aquí..." rows="4"></textarea>
+            <button class="form-button" onclick="createPost()">Publicar</button>
+            <button class="form-button" onclick="logout()">Cerrar sesión</button>
+        </div>
+        <div class="feed" id="feed">
+            <h2>Publicaciones Recientes</h2>
+            <div id="post-list"></div>
+        </div>
     </div>
+
     <script>
-        function updateCountdown() {
-            const vacationDate = new Date('December 18, 2024 13:00:00').getTime();
-            const now = new Date().getTime();
-            const distance = vacationDate - now;
+        function showRegisterForm() {
+            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('post-form').style.display = 'none';
+            document.getElementById('feed').style.display = 'none';
+        }
 
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        function showLoginForm() {
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('post-form').style.display = 'none';
+            document.getElementById('feed').style.display = 'none';
+        }
 
-            document.getElementById('countdown').innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        function showPostForm() {
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('post-form').style.display = 'block';
+            document.getElementById('feed').style.display = 'block';
+            loadPosts();
+        }
 
-            if (distance < 0) {
-                clearInterval(interval);
-                document.getElementById('countdown').innerHTML = '¡Ya estás de vacaciones!';
+        function register() {
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+
+            if (username === '' || password === '') {
+                alert('Por favor, completa todos los campos.');
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            users.push({ username, password });
+            localStorage.setItem('users', JSON.stringify(users));
+            alert('Registro exitoso. Ahora puedes iniciar sesión.');
+            showLoginForm();
+        }
+
+        function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(user => user.username === username && user.password === password);
+
+            if (user) {
+                localStorage.setItem('loggedInUser', username);
+                showPostForm();
+            } else {
+                alert('Nombre de usuario o contraseña incorrectos.');
             }
         }
 
-        const interval = setInterval(updateCountdown, 1000);
-        updateCountdown(); // Para inicializar el contador inmediatamente
+        function createPost() {
+            const content = document.getElementById('post-content').value;
+
+            if (content === '') {
+                alert('Por favor, escribe algo para publicar.');
+                return;
+            }
+
+            const username = localStorage.getItem('loggedInUser');
+            let posts = JSON.parse(localStorage.getItem('posts')) || [];
+            posts.push({ username, content, timestamp: new Date() });
+            localStorage.setItem('posts', JSON.stringify(posts));
+            document.getElementById('post-content').value = '';
+            loadPosts();
+        }
+
+        function loadPosts() {
+            const posts = JSON.parse(localStorage.getItem('posts')) || [];
+            const postList = document.getElementById('post-list');
+
+            postList.innerHTML = '';
+
+            posts.forEach(post => {
+                const postItem = document.createElement('div');
+                postItem.className = 'post';
+
+                const postHeader = document.createElement('h3');
+                postHeader.innerText = `${post.username} - ${new Date(post.timestamp).toLocaleString()}`;
+                postItem.appendChild(postHeader);
+
+                const postContent = document.createElement('p');
+                postContent.innerText = post.content;
+                postItem.appendChild(postContent);
+
+                postList.appendChild(postItem);
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedInUser');
+            showLoginForm();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (loggedInUser) {
+                showPostForm();
+            } else {
+                showLoginForm();
+            }
+        });
     </script>
 </body>
 </html>
