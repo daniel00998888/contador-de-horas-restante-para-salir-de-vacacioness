@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicación de Chat</title>
+    <title>Juego de Niveles</title>
     <style>
         body, html {
             margin: 0;
@@ -17,207 +17,97 @@
             font-family: Arial, sans-serif;
         }
 
-        .container {
-            text-align: center;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        #game-container {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            background-color: #87CEEB;
+            overflow: hidden;
+            border: 2px solid #000;
         }
 
-        #chat, #invite-form, #notification, #messages {
-            display: none;
-            margin-top: 20px;
+        .player, .platform {
+            position: absolute;
         }
 
-        #messages {
-            height: 300px;
-            width: 300px;
-            border: 1px solid #ccc;
-            overflow-y: auto;
-            margin: 20px auto;
-            padding: 10px;
-            background-color: #e1e1e1;
+        .player {
+            width: 30px;
+            height: 30px;
+            background-color: #FF4500;
+            bottom: 0;
         }
 
-        #message-input {
-            width: 80%;
-            padding: 10px;
-            margin-right: 10px;
-        }
-
-        #send-button {
-            padding: 10px;
-        }
-
-        .message {
-            padding: 5px;
-            margin-bottom: 10px;
-            background-color: #fff;
-            border-radius: 5px;
-            text-align: left;
+        .platform {
+            width: 100px;
+            height: 20px;
+            background-color: #8B4513;
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Aplicación de Chat</h1>
-        <div id="register">
-            <input type="text" id="username" placeholder="Nombre de usuario">
-            <button onclick="register()">Empezar a chatear</button>
-        </div>
-        <div id="menu" style="display: none;">
-            <button onclick="showInviteForm()">Buscar amigos</button>
-        </div>
-        <div id="invite-form" style="display: none;">
-            <input type="text" id="friend-username" placeholder="Nombre de usuario del amigo">
-            <button onclick="sendInvite()">Enviar invitación</button>
-        </div>
-        <div id="notification" style="display: none;">
-            <p id="notification-message"></p>
-            <button onclick="acceptInvite()">Aceptar</button>
-        </div>
-        <div id="chat" style="display: none;">
-            <div id="messages"></div>
-            <input type="text" id="message-input" placeholder="Escribe tu mensaje...">
-            <button id="send-button" onclick="sendMessage()">Enviar</button>
-        </div>
+    <div id="game-container">
+        <div class="player" id="player"></div>
+        <div class="platform" id="platform1" style="bottom: 100px; left: 100px;"></div>
+        <div class="platform" id="platform2" style="bottom: 200px; left: 300px;"></div>
+        <div class="platform" id="platform3" style="bottom: 300px; left: 500px;"></div>
     </div>
     <script>
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAFndDY-EehQ4ZQujnkVpr2yllf9efjN8Y",
-            authDomain: "aplicacion-de-mensajes-fd642.firebaseapp.com",
-            databaseURL: "",
-            projectId: "aplicacion-de-mensajes-fd642",
-            storageBucket: "aplicacion-de-mensajes-fd642.firebasestorage.app",
-            messagingSenderId: "61201561890",
-            appId: "1:61201561890:web:70ed4b05736ab91d5b0d7b"
-        };
-        firebase.initializeApp(firebaseConfig);
+        const player = document.getElementById('player');
+        const gameContainer = document.getElementById('game-container');
+        const platforms = document.querySelectorAll('.platform');
 
-        const auth = firebase.auth();
-        const database = firebase.database();
+        let playerX = 0;
+        let playerY = 0;
+        let speedX = 0;
+        let speedY = 0;
+        const gravity = 0.5;
+        const jumpPower = 10;
+        let onGround = true;
 
-        let username = null;
-        let friend = null;
-        let chatId = null;
-
-        function register() {
-            username = document.getElementById('username').value;
-            if (username) {
-                const usersRef = database.ref('users');
-                usersRef.push({ username });
-                document.getElementById('register').style.display = 'none';
-                document.getElementById('menu').style.display = 'block';
-                listenForInvites();
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') speedX = -5;
+            if (e.key === 'ArrowRight') speedX = 5;
+            if (e.key === ' ' && onGround) {
+                speedY = -jumpPower;
+                onGround = false;
             }
-        }
+        });
 
-        function showInviteForm() {
-            document.getElementById('invite-form').style.display = 'block';
-        }
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') speedX = 0;
+        });
 
-        function sendInvite() {
-            const friendUsername = document.getElementById('friend-username').value;
-            const usersRef = database.ref('users');
-            usersRef.orderByChild('username').equalTo(friendUsername).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    const friendKey = Object.keys(snapshot.val())[0];
-                    database.ref(`invitations/${friendKey}`).set({
-                        from: username
-                    });
-                    alert('Invitación enviada');
-                } else {
-                    alert('Usuario no encontrado');
-                }
-            });
-        }
+        function gameLoop() {
+            speedY += gravity;
+            playerX += speedX;
+            playerY += speedY;
 
-        function listenForInvites() {
-            const usersRef = database.ref('users');
-            usersRef.orderByChild('username').equalTo(username).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    const userKey = Object.keys(snapshot.val())[0];
-                    database.ref(`invitations/${userKey}`).on('value', snapshot => {
-                        if (snapshot.exists()) {
-                            const invitation = snapshot.val();
-                            document.getElementById('notification-message').innerText = `${invitation.from} te ha invitado a chatear`;
-                            document.getElementById('notification').style.display = 'block';
-                        }
-                    });
-                }
-            });
-        }
-
-        function acceptInvite() {
-            const usersRef = database.ref('users');
-            usersRef.orderByChild('username').equalTo(username).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    const userKey = Object.keys(snapshot.val())[0];
-                    database.ref(`invitations/${userKey}`).once('value', snapshot => {
-                        if (snapshot.exists()) {
-                            const invitation = snapshot.val();
-                            chatId = `${invitation.from}-${username}`;
-
-                            database.ref(`chats/${chatId}`).set({
-                                users: [invitation.from, username],
-                                messages: []
-                            });
-
-                            database.ref(`invitations/${userKey}`).remove();
-                            startChatWithFriend(invitation.from);
-                        }
-                    });
-                }
-            });
-        }
-
-        function startChatWithFriend(friendUsername) {
-            friend = friendUsername;
-            document.getElementById('notification').style.display = 'none';
-            document.getElementById('invite-form').style.display = 'none';
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('chat').style.display = 'block';
-            listenToChatUpdates();
-        }
-
-        function listenToChatUpdates() {
-            const chatRef = database.ref(`chats/${chatId}`);
-            chatRef.on('value', snapshot => {
-                const chatData = snapshot.val();
-                displayMessages(chatData.messages);
-            });
-        }
-
-        function displayMessages(messages) {
-            const messagesContainer = document.getElementById('messages');
-            messagesContainer.innerHTML = '';
-            messages.forEach(message => {
-                const messageElement = document.createElement('div');
-                messageElement.className = 'message';
-                messageElement.innerText = `${message.sender}: ${message.text}`;
-                messagesContainer.appendChild(messageElement);
-            });
-        }
-
-        function sendMessage() {
-            const messageInput = document.getElementById('message-input');
-            const messageText = messageInput.value;
-            if (messageText) {
-                const chatRef = database.ref(`chats/${chatId}`);
-                chatRef.once('value', snapshot => {
-                    const chatData = snapshot.val();
-                    const newMessage = { sender: username, text: messageText };
-                    chatData.messages.push(newMessage);
-                    chatRef.update({ messages: chatData.messages });
-                    messageInput.value = '';
-                });
+            if (playerX < 0) playerX = 0;
+            if (playerX + player.clientWidth > gameContainer.clientWidth) playerX = gameContainer.clientWidth - player.clientWidth;
+            if (playerY + player.clientHeight > gameContainer.clientHeight) {
+                playerY = gameContainer.clientHeight - player.clientHeight;
+                speedY = 0;
+                onGround = true;
             }
+
+            platforms.forEach(platform => {
+                if (playerX < platform.offsetLeft + platform.clientWidth &&
+                    playerX + player.clientWidth > platform.offsetLeft &&
+                    playerY + player.clientHeight > platform.offsetTop &&
+                    playerY + player.clientHeight - speedY < platform.offsetTop) {
+                    playerY = platform.offsetTop - player.clientHeight;
+                    speedY = 0;
+                    onGround = true;
+                }
+            });
+
+            player.style.left = `${playerX}px`;
+            player.style.bottom = `${playerY}px`;
+
+            requestAnimationFrame(gameLoop);
         }
+
+        gameLoop();
     </script>
 </body>
 </html>
