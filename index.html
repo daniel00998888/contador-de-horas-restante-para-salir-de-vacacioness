@@ -137,10 +137,10 @@
                             let vel0F = rotate(vel0.x, vel0.y, sin, cos, false);
                             let vel1F = rotate(vel1.x, vel1.y, sin, cos, false);
 
-                            ball.speedX = vel0F.x * 0.9;  // Reduce la velocidad resultante
-                            ball.speedY = vel0F.y * 0.9;
-                            otherBall.speedX = vel1F.x * 0.9;
-                            otherBall.speedY = vel1F.y * 0.9;
+                            ball.speedX = vel0F.x * 0.5;  // Reduce la velocidad resultante aún más
+                            ball.speedY = vel0F.y * 0.5;
+                            otherBall.speedX = vel1F.x * 0.5;
+                            otherBall.speedY = vel1F.y * 0.5;
                         }
                     }
                 }
