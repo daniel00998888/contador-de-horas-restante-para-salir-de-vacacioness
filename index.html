@@ -17,12 +17,6 @@
             font-family: Arial, sans-serif;
         }
 
-        #game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
         #table {
             position: relative;
             width: 800px;
@@ -31,7 +25,6 @@
             border: 15px solid #8B4513;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-            margin-bottom: 20px;
         }
 
         .ball, .hole {
@@ -51,72 +44,26 @@
             width: 30px;
             height: 30px;
         }
-
-        #cue-stick {
-            position: absolute;
-            width: 400px;
-            height: 5px;
-            background-color: #8B4513;
-            transform-origin: left center;
-            display: none;
-        }
-
-        #power-bar-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        #power-bar {
-            width: 200px;
-            height: 20px;
-            background-color: #ccc;
-            margin-right: 10px;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        #power-bar-fill {
-            width: 0;
-            height: 100%;
-            background-color: #FF4500;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 1em;
-        }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="power-bar-container">
-            <div id="power-bar">
-                <div id="power-bar-fill"></div>
-            </div>
-            <button id="strike-button" onclick="strike()">Golpear</button>
-        </div>
-        <div id="table">
-            <div class="ball" id="cue-ball" style="left: 390px; top: 190px;"></div>
-            <div class="ball" style="background-color: red; left: 200px; top: 100px;"></div>
-            <div class="ball" style="background-color: blue; left: 600px; top: 300px;"></div>
-            <div class="hole" style="left: 0; top: 0;"></div>
-            <div class="hole" style="left: 780px; top: 0;"></div>
-            <div class="hole" style="left: 0; top: 380px;"></div>
-            <div class="hole" style="left: 780px; top: 380px;"></div>
-            <div class="hole" style="left: 390px; top: 0;"></div>
-            <div class="hole" style="left: 390px; top: 380px;"></div>
-            <div id="cue-stick"></div>
-        </div>
+    <div id="table">
+        <div class="ball" id="cue-ball" style="left: 390px; top: 190px;"></div>
+        <div class="ball" style="background-color: red; left: 200px; top: 100px;"></div>
+        <div class="ball" style="background-color: blue; left: 600px; top: 300px;"></div>
+        <div class="hole" style="left: 0; top: 0;"></div>
+        <div class="hole" style="left: 780px; top: 0;"></div>
+        <div class="hole" style="left: 0; top: 380px;"></div>
+        <div class="hole" style="left: 780px; top: 380px;"></div>
+        <div class="hole" style="left: 390px; top: 0;"></div>
+        <div class="hole" style="left: 390px; top: 380px;"></div>
     </div>
     <script>
         const table = document.getElementById('table');
         const cueBall = document.getElementById('cue-ball');
         const balls = document.querySelectorAll('.ball');
         const holes = document.querySelectorAll('.hole');
-        const cueStick = document.getElementById('cue-stick');
-        const powerBarFill = document.getElementById('power-bar-fill');
-        const strikeButton = document.getElementById('strike-button');
+        const friction = 0.98;
 
         let ballPositions = Array.from(balls).map(ball => ({
             element: ball,
@@ -126,55 +73,19 @@
             speedY: 0
         }));
 
-        let powerLevel = 0;
-        let aiming = false;
-        let aimDirection = 0;
-
-        table.addEventListener('mousemove', (e) => {
-            if (aiming) {
-                const rect = table.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
-                const cueBallPosition = ballPositions.find(ball => ball.element === cueBall);
-
-                aimDirection = Math.atan2(mouseY - cueBallPosition.y, mouseX - cueBallPosition.x);
-                cueStick.style.left = `${cueBallPosition.x + 10}px`;
-                cueStick.style.top = `${cueBallPosition.y + 10}px`;
-                cueStick.style.transform = `rotate(${aimDirection}rad)`;
-                cueStick.style.display = 'block';
-            }
-        });
-
-        table.addEventListener('mousedown', () => {
-            aiming = true;
-            powerLevel = 0;
-            powerBarFill.style.width = `${powerLevel}%`;
-        });
-
-        table.addEventListener('mouseup', () => {
-            aiming = false;
-            cueStick.style.display = 'none';
-        });
-
-        function strike() {
+        table.addEventListener('click', (e) => {
+            const rect = table.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
             const cueBallPosition = ballPositions.find(ball => ball.element === cueBall);
 
-            cueBallPosition.speedX = (powerLevel / 10) * Math.cos(aimDirection);
-            cueBallPosition.speedY = (powerLevel / 10) * Math.sin(aimDirection);
-
-            powerLevel = 0;
-            powerBarFill.style.width = `${powerLevel}%`;
-        }
-
-        setInterval(() => {
-            if (aiming) {
-                powerLevel = (powerLevel + 1) % 100;
-                powerBarFill.style.width = `${powerLevel}%`;
-            }
-        }, 50);
+            cueBallPosition.speedX = (clickX - cueBallPosition.x) / 20;
+            cueBallPosition.speedY = (clickY - cueBallPosition.y) / 20;
+        });
 
         function checkCollisions() {
             ballPositions.forEach((ball, index) => {
+                // Colisiones con los hoyos
                 holes.forEach(hole => {
                     if (ball.x < hole.offsetLeft + hole.clientWidth &&
                         ball.x + ball.element.clientWidth > hole.offsetLeft &&
@@ -185,6 +96,7 @@
                     }
                 });
 
+                // Colisiones con otras bolas
                 for (let i = 0; i < ballPositions.length; i++) {
                     if (i !== index) {
                         let otherBall = ballPositions[i];
@@ -193,38 +105,48 @@
                         let distance = Math.sqrt(dx * dx + dy * dy);
 
                         if (distance < ball.element.clientWidth) {
+                            // Resolver colisión
                             let angle = Math.atan2(dy, dx);
                             let sin = Math.sin(angle);
                             let cos = Math.cos(angle);
 
-                            let pos0 = { x: 0, y: 0 };
+                            // Rotar las coordenadas del sistema
+                            let pos0 = { x: 0, y: 0 }; // Ball position
                             let pos1 = rotate(dx, dy, sin, cos, true);
 
+                            // Rotar las velocidades del sistema
                             let vel0 = rotate(ball.speedX, ball.speedY, sin, cos, true);
                             let vel1 = rotate(otherBall.speedX, otherBall.speedY, sin, cos, true);
 
+                            // Colisión de bolas
                             let vxTotal = vel0.x - vel1.x;
-                            vel0.x = ((ball.mass - otherBall.mass) * vel0.x + 2 * otherBall.mass * vel1.x) / (ball.mass + otherBall.mass);
+                            vel0.x = ((ball.mass - otherBall.mass) * vel0.x + 2 * otherBall.mass * vel1.x) /
+                                     (ball.mass + otherBall.mass);
                             vel1.x = vxTotal + vel0.x;
 
+                            // Volver a las coordenadas originales
                             let absV = Math.abs(vel0.x) + Math.abs(vel1.x);
                             let overlap = (ball.element.clientWidth - Math.abs(pos0.x - pos1.x)) / absV;
 
                             pos0.x += vel0.x * overlap;
                             pos1.x += vel1.x * overlap;
 
+                            // Volver a las coordenadas originales
                             let pos0F = rotate(pos0.x, pos0.y, sin, cos, false);
                             let pos1F = rotate(pos1.x, pos1.y, sin, cos, false);
 
+                            // Actualizar posiciones
                             otherBall.x = ball.x + pos1F.x;
                             otherBall.y = ball.y + pos1F.y;
                             ball.x = ball.x + pos0F.x;
                             ball.y = ball.y + pos0F.y;
 
+                            // Volver a las velocidades originales
                             let vel0F = rotate(vel0.x, vel0.y, sin, cos, false);
                             let vel1F = rotate(vel1.x, vel1.y, sin, cos, false);
 
-                            ball.speedX = vel0F.x;
+                            // Actualizar velocidades
+                            ball.speedX = vel0F.y;
                             ball.speedY = vel0F.y;
                             otherBall.speedX = vel1F.x;
                             otherBall.speedY = vel1F.y;
@@ -240,3 +162,31 @@
                 y: (reverse) ? (y * cos - x * sin) : (y * cos + x * sin)
             };
         }
+
+        function gameLoop() {
+            ballPositions.forEach(ball => {
+                ball.x += ball.speedX;
+                ball.y += ball.speedY;
+
+                ball.speedX *= friction;
+                ball.speedY *= friction;
+
+                if (ball.x < 0 || ball.x + ball.element.clientWidth > table.clientWidth) {
+                    ball.speedX = -ball.speedX;
+                }
+                if (ball.y < 0 || ball.y + ball.element.clientHeight > table.clientHeight) {
+                    ball.speedY = -ball.speedY;
+                }
+
+                ball.element.style.left = `${ball.x}px`;
+                ball.element.style.top = `${ball.y}px`;
+            });
+
+            checkCollisions();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
