@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Niveles</title>
+    <title>Juego Estilo Mario Bros</title>
     <style>
         body, html {
             margin: 0;
@@ -13,20 +13,20 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #f4f4f4;
+            background-color: #87CEEB;
             font-family: Arial, sans-serif;
         }
 
         #game-container {
             position: relative;
-            width: 600px;
+            width: 800px;
             height: 400px;
             background-color: #87CEEB;
             overflow: hidden;
             border: 2px solid #000;
         }
 
-        .player, .platform {
+        .player, .platform, .goal {
             position: absolute;
         }
 
@@ -42,19 +42,28 @@
             height: 20px;
             background-color: #8B4513;
         }
+
+        .goal {
+            width: 30px;
+            height: 30px;
+            background-color: #FFD700;
+        }
     </style>
 </head>
 <body>
     <div id="game-container">
         <div class="player" id="player"></div>
-        <div class="platform" id="platform1" style="bottom: 100px; left: 100px;"></div>
-        <div class="platform" id="platform2" style="bottom: 200px; left: 300px;"></div>
-        <div class="platform" id="platform3" style="bottom: 300px; left: 500px;"></div>
+        <div class="platform" style="bottom: 50px; left: 0; width: 200px;"></div>
+        <div class="platform" style="bottom: 100px; left: 250px; width: 100px;"></div>
+        <div class="platform" style="bottom: 150px; left: 400px; width: 200px;"></div>
+        <div class="platform" style="bottom: 50px; left: 650px; width: 150px;"></div>
+        <div class="goal" style="bottom: 80px; left: 750px;"></div>
     </div>
     <script>
         const player = document.getElementById('player');
         const gameContainer = document.getElementById('game-container');
         const platforms = document.querySelectorAll('.platform');
+        const goal = document.querySelector('.goal');
 
         let playerX = 0;
         let playerY = 0;
@@ -101,10 +110,27 @@
                 }
             });
 
+            if (playerX < goal.offsetLeft + goal.clientWidth &&
+                playerX + player.clientWidth > goal.offsetLeft &&
+                playerY + player.clientHeight > goal.offsetTop &&
+                playerY < goal.offsetTop + goal.clientHeight) {
+                alert("¡Ganaste!");
+                resetGame();
+            }
+
             player.style.left = `${playerX}px`;
             player.style.bottom = `${playerY}px`;
 
             requestAnimationFrame(gameLoop);
+        }
+
+        function resetGame() {
+            playerX = 0;
+            playerY = 0;
+            speedX = 0;
+            speedY = 0;
+            player.style.left = `${playerX}px`;
+            player.style.bottom = `${playerY}px`;
         }
 
         gameLoop();
