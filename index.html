@@ -237,7 +237,11 @@
 
         function handleClick(event) {
             const index = event.target.getAttribute('data-index');
+            const currentGame = JSON.parse(localStorage.getItem('currentGame'));
             if (!board[index] && !checkWinner() && ((username === currentGame.player1 && currentPlayer === 'x') || (username === currentGame.player2 && currentPlayer === 'o'))) {
                 board[index] = currentPlayer;
                 currentPlayer = currentPlayer === 'x' ? 'o' : 'x';
-                localStorage.setItem('currentGame', JSON.stringify({ player1: currentGame.player1, player2[_{{{CITATION{{{_1{](https://github.com/la9una/web/tree/ba1073ae044ebb7b538a3b13f0f9598f7c410bb6/docs%2Fbootstrap%2Falignci.md)[_{{{CITATION{{{_2{](https://github.com/arnellebalane/tictactoe/tree/87919cc0cfc222cd42fd4d0eded33d11080ba34a/index.php)[_{{{CITATION{{{_3{](https://github.com/igormcampos/vuejs-tictactoe/tree/25b357f391e0052dae9a63a1d5a29c00266c7a07/js%2FGame.js)[_{{{CITATION{{{_4{](https://github.com/aureliasegarra/tictactoeJS/tree/90b3cae16bf6ed5a76fd5a79a66e32b9dd82e5a1/app.js)[_{{{CITATION{{{_5{](https://github.com/matsukazu0918/react-tutorial/tree/6d64c2879df16eee63bb2557aea8b8a32aacc71c/src%2Findex.js)[_{{{CITATION{{{_6{](https://github.com/ZachS2/Pirple-JavaScript-Course/tree/50953d6a150ee56107d7e2eec1955856950256d5/Homework%2FHomework%20%238%20-%20Events%2Fjs%2FGame.js)[_{{{CITATION{{{_7{](https://github.com/sergiojc90/tic-tac-toe/tree/c01da7acffda773e0b887366318c614fe6d9dff7/js%2Fscript.js)[_{{{CITATION{{{_8{](https://github.com/Dan-Tsesarsky/tic-tac-toe/tree/88c0496520891ee871078adae063a4833960e5eb/client%2Fsrc%2Fcomponents%2FGame%2FGameRules.js)
+                localStorage.setItem('currentGame', JSON.stringify({ player1: currentGame.player1, player2: currentGame.player2, gameId, board, currentPlayer }));
+                updateBoard();
+            }
+        }
