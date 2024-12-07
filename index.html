@@ -33,7 +33,7 @@
             display: none;
         }
 
-        .form-input {
+        .form-input, .form-textarea {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -68,8 +68,18 @@
             margin-bottom: 10px;
         }
 
-        .post p {
+        .post p, .post img, .post video {
             margin: 0;
+            margin-bottom: 10px;
+        }
+
+        .post img, .post video {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+
+        .post video {
+            controls: true;
         }
     </style>
 </head>
@@ -91,7 +101,8 @@
         </div>
         <div class="form" id="post-form">
             <h2>Crear Publicación</h2>
-            <textarea id="post-content" class="form-input" placeholder="Escribe tu publicación aquí..." rows="4"></textarea>
+            <textarea id="post-content" class="form-textarea" placeholder="Escribe tu publicación aquí..." rows="4"></textarea>
+            <input type="file" id="post-file" class="form-input" accept="image/*,video/*">
             <button class="form-button" onclick="createPost()">Publicar</button>
             <button class="form-button" onclick="logout()">Cerrar sesión</button>
         </div>
@@ -157,18 +168,32 @@
 
         function createPost() {
             const content = document.getElementById('post-content').value;
+            const fileInput = document.getElementById('post-file');
+            const file = fileInput.files[0];
+            const reader = new FileReader();
 
-            if (content === '') {
-                alert('Por favor, escribe algo para publicar.');
-                return;
+            reader.onload = function(e) {
+                const username = localStorage.getItem('loggedInUser');
+                let posts = JSON.parse(localStorage.getItem('posts')) || [];
+                const post = {
+                    username,
+                    content,
+                    fileType: file ? file.type : null,
+                    fileData: file ? e.target.result : null,
+                    timestamp: new Date()
+                };
+                posts.push(post);
+                localStorage.setItem('posts', JSON.stringify(posts));
+                document.getElementById('post-content').value = '';
+                fileInput.value = '';
+                loadPosts();
             }
 
-            const username = localStorage.getItem('loggedInUser');
-            let posts = JSON.parse(localStorage.getItem('posts')) || [];
-            posts.push({ username, content, timestamp: new Date() });
-            localStorage.setItem('posts', JSON.stringify(posts));
-            document.getElementById('post-content').value = '';
-            loadPosts();
+            if (file) {
+                reader.readAsDataURL(file);
+            } else {
+                reader.onload();
+            }
         }
 
         function loadPosts() {
@@ -185,9 +210,24 @@
                 postHeader.innerText = `${post.username} - ${new Date(post.timestamp).toLocaleString()}`;
                 postItem.appendChild(postHeader);
 
-                const postContent = document.createElement('p');
-                postContent.innerText = post.content;
-                postItem.appendChild(postContent);
+                if (post.content) {
+                    const postContent = document.createElement('p');
+                    postContent.innerText = post.content;
+                    postItem.appendChild(postContent);
+                }
+
+                if (post.fileData) {
+                    if (post.fileType.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = post.fileData;
+                        postItem.appendChild(img);
+                    } else if (post.fileType.startsWith('video/')) {
+                        const video = document.createElement('video');
+                        video.src = post.fileData;
+                        video.controls = true;
+                        postItem.appendChild(video);
+                    }
+                }
 
                 postList.appendChild(postItem);
             });
