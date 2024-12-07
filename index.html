@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página de Juegos en Línea</title>
+    <title>Juegos en Línea</title>
     <style>
         body, html {
             margin: 0;
@@ -55,46 +55,44 @@
             padding: 10px 20px;
             font-size: 1em;
         }
+
+        #invite-form {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #notification {
+            display: none;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Página de Juegos en Línea</h1>
+        <h1>Juegos en Línea</h1>
         <div id="register">
             <input type="text" id="username" placeholder="Nombre de usuario">
             <button onclick="register()">Empezar a jugar</button>
         </div>
         <div id="menu" style="display: none;">
-            <button onclick="findGame()">Jugar en línea</button>
+            <button onclick="showInviteForm()">Buscar jugadores</button>
+        </div>
+        <div id="invite-form" style="display: none;">
+            <input type="text" id="friend-username" placeholder="Nombre de usuario del amigo">
+            <button onclick="sendInvite()">Enviar invitación</button>
+        </div>
+        <div id="notification" style="display: none;">
+            <p id="notification-message"></p>
+            <button onclick="acceptInvite()">Aceptar</button>
         </div>
         <div id="game" style="display: none;">
             <div class="board" id="board"></div>
             <div id="message"></div>
             <button onclick="resetGame()">Reiniciar Juego</button>
         </div>
-        <div id="waiting" style="display: none;">
-            <p>Emparejando con otra persona...</p>
-        </div>
     </div>
     <script>
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "TU_AUTH_DOMAIN",
-            databaseURL: "TU_DATABASE_URL",
-            projectId: "TU_PROJECT_ID",
-            storageBucket: "TU_STORAGE_BUCKET",
-            messagingSenderId: "TU_MESSAGING_SENDER_ID",
-            appId: "TU_APP_ID"
-        };
-        firebase.initializeApp(firebaseConfig);
-
-        const auth = firebase.auth();
-        const database = firebase.database();
-
         let currentPlayer = 'x';
         let board = Array(9).fill(null);
         let username = null;
@@ -104,50 +102,67 @@
         function register() {
             username = document.getElementById('username').value;
             if (username) {
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                users.push({ username });
+                localStorage.setItem('users', JSON.stringify(users));
+
                 document.getElementById('register').style.display = 'none';
                 document.getElementById('menu').style.display = 'block';
+                listenForInvites();
             }
         }
 
-        function findGame() {
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('waiting').style.display = 'block';
+        function showInviteForm() {
+            document.getElementById('invite-form').style.display = 'block';
+        }
 
-            const waitingRef = database.ref('waitingPlayers');
-            waitingRef.once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    const waitingPlayers = snapshot.val();
-                    const waitingPlayerKey = Object.keys(waitingPlayers)[0];
-                    opponent = waitingPlayers[waitingPlayerKey].username;
-                    gameId = database.ref('games').push().key;
+        function sendInvite() {
+            const friendUsername = document.getElementById('friend-username').value;
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const friend = users.find(user => user.username === friendUsername);
 
-                    database.ref(`games/${gameId}`).set({
-                        player1: username,
-                        player2: opponent,
-                        board: Array(9).fill(null),
-                        currentPlayer: 'x'
-                    });
+            if (friend) {
+                const invitations = JSON.parse(localStorage.getItem('invitations')) || [];
+                invitations.push({ from: username, to: friendUsername, game: 'Tres en Raya' });
+                localStorage.setItem('invitations', JSON.stringify(invitations));
+                alert('Invitación enviada');
+            } else {
+                alert('Usuario no encontrado');
+            }
+        }
 
-                    database.ref(`waitingPlayers/${waitingPlayerKey}`).remove();
-                    startGameWithOpponent(opponent);
-                } else {
-                    waitingRef.push({ username });
+        function listenForInvites() {
+            setInterval(() => {
+                const invitations = JSON.parse(localStorage.getItem('invitations')) || [];
+                const invitation = invitations.find(invite => invite.to === username);
+
+                if (invitation) {
+                    document.getElementById('notification-message').innerText = `${invitation.from} te ha invitado a jugar ${invitation.game}`;
+                    document.getElementById('notification').style.display = 'block';
                 }
-            });
+            }, 1000);
+        }
 
-            database.ref('games').on('child_added', (snapshot) => {
-                const gameData = snapshot.val();
-                if (gameData.player1 === username || gameData.player2 === username) {
-                    gameId = snapshot.key;
-                    opponent = gameData.player1 === username ? gameData.player2 : gameData.player1;
-                    startGameWithOpponent(opponent);
-                }
-            });
+        function acceptInvite() {
+            const invitations = JSON.parse(localStorage.getItem('invitations')) || [];
+            const invitation = invitations.find(invite => invite.to === username);
+            if (invitation) {
+                gameId = new Date().getTime();  // Simulación de un ID de juego único
+
+                localStorage.setItem('currentGame', JSON.stringify({ player1: invitation.from, player2: username, gameId, board: Array(9).fill(null), currentPlayer: 'x' }));
+
+                const updatedInvitations = invitations.filter(invite => invite.to !== username);
+                localStorage.setItem('invitations', JSON.stringify(updatedInvitations));
+
+                startGameWithOpponent(invitation.from);
+            }
         }
 
         function startGameWithOpponent(opponentPlayer) {
             opponent = opponentPlayer;
-            document.getElementById('waiting').style.display = 'none';
+            document.getElementById('notification').style.display = 'none';
+            document.getElementById('invite-form').style.display = 'none';
+            document.getElementById('menu').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             setupGame('Tres en Raya');
             listenToGameUpdates();
@@ -172,20 +187,20 @@
         }
 
         function listenToGameUpdates() {
-            const gameRef = database.ref(`games/${gameId}`);
-            gameRef.on('value', (snapshot) => {
-                const gameData = snapshot.val();
-                board = gameData.board;
-                currentPlayer = gameData.currentPlayer;
-                updateBoard();
+            setInterval(() => {
+                const currentGame = JSON.parse(localStorage.getItem('currentGame'));
+                if (currentGame && (currentGame.player1 === username || currentGame.player2 === username)) {
+                    board = currentGame.board;
+                    currentPlayer = currentGame.currentPlayer;
+                    updateBoard();
 
-                const winner = checkWinner();
-                if (winner) {
-                    const message = winner === 'tie' ? '¡Empate!' : `¡${winner.toUpperCase()} gana!`;
-                    document.getElementById('message').innerText = message;
-                    gameRef.off();
+                    const winner = checkWinner();
+                    if (winner) {
+                        const message = winner === 'tie' ? '¡Empate!' : `¡${winner.toUpperCase()} gana!`;
+                        document.getElementById('message').innerText = message;
+                    }
                 }
-            });
+            }, 1000);
         }
 
         function updateBoard() {
@@ -222,26 +237,7 @@
 
         function handleClick(event) {
             const index = event.target.getAttribute('data-index');
-            if (!board[index] && !checkWinner() && currentPlayer === 'x') { // Limitar los movimientos solo al jugador cuyo turno es.
+            if (!board[index] && !checkWinner() && ((username === currentGame.player1 && currentPlayer === 'x') || (username === currentGame.player2 && currentPlayer === 'o'))) {
                 board[index] = currentPlayer;
                 currentPlayer = currentPlayer === 'x' ? 'o' : 'x';
-                database.ref(`games/${gameId}`).update({
-                    board: board,
-                    currentPlayer: currentPlayer
-                });
-            }
-        }
-
-        function resetGame() {
-            board = Array(9).fill(null);
-            currentPlayer = 'x';
-            database.ref(`games/${gameId}`).update({
-                board: board,
-                currentPlayer: currentPlayer
-            });
-            updateBoard();
-            document.getElementById('message').innerText = '';
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.cell').forEach(cell => cell.addEvent[_{{{CITATION{{{_1{](https://github.com/dubeyaditya29/youtube-disney-clone/tree/376c0b8eabc9ae9ff41cc720b3af0206ed29e68e/src%2Findex.js)[_{{{CITATION{{{_2{](https://github.com/arnellebalane/tictactoe/tree/87919cc0cfc222cd42fd4d0eded33d11080ba34a/index.php)[_{{{CITATION{{{_3{](https://github.com/igormcampos/vuejs-tictactoe/tree/25b357f391e0052dae9a63a1d5a29c00266c7a07/js%2FGame.js)[_{{{CITATION{{{_4{](https://github.com/aureliasegarra/tictactoeJS/tree/90b3cae16bf6ed5a76fd5a79a66e32b9dd82e5a1/app.js)[_{{{CITATION{{{_5{](https://github.com/matsukazu0918/react-tutorial/tree/6d64c2879df16eee63bb2557aea8b8a32aacc71c/src%2Findex.js)[_{{{CITATION{{{_6{](https://github.com/ZachS2/Pirple-JavaScript-Course/tree/50953d6a150ee56107d7e2eec1955856950256d5/Homework%2FHomework%20%238%20-%20Events%2Fjs%2FGame.js)[_{{{CITATION{{{_7{](https://github.com/sergiojc90/tic-tac-toe/tree/c01da7acffda773e0b887366318c614fe6d9dff7/js%2Fscript.js)[_{{{CITATION{{{_8{](https://github.com/Dan-Tsesarsky/tic-tac-toe/tree/88c0496520891ee871078adae063a4833960e5eb/client%2Fsrc%2Fcomponents%2FGame%2FGameRules.js)
+                localStorage.setItem('currentGame', JSON.stringify({ player1: currentGame.player1, player2[_{{{CITATION{{{_1{](https://github.com/la9una/web/tree/ba1073ae044ebb7b538a3b13f0f9598f7c410bb6/docs%2Fbootstrap%2Falignci.md)[_{{{CITATION{{{_2{](https://github.com/arnellebalane/tictactoe/tree/87919cc0cfc222cd42fd4d0eded33d11080ba34a/index.php)[_{{{CITATION{{{_3{](https://github.com/igormcampos/vuejs-tictactoe/tree/25b357f391e0052dae9a63a1d5a29c00266c7a07/js%2FGame.js)[_{{{CITATION{{{_4{](https://github.com/aureliasegarra/tictactoeJS/tree/90b3cae16bf6ed5a76fd5a79a66e32b9dd82e5a1/app.js)[_{{{CITATION{{{_5{](https://github.com/matsukazu0918/react-tutorial/tree/6d64c2879df16eee63bb2557aea8b8a32aacc71c/src%2Findex.js)[_{{{CITATION{{{_6{](https://github.com/ZachS2/Pirple-JavaScript-Course/tree/50953d6a150ee56107d7e2eec1955856950256d5/Homework%2FHomework%20%238%20-%20Events%2Fjs%2FGame.js)[_{{{CITATION{{{_7{](https://github.com/sergiojc90/tic-tac-toe/tree/c01da7acffda773e0b887366318c614fe6d9dff7/js%2Fscript.js)[_{{{CITATION{{{_8{](https://github.com/Dan-Tsesarsky/tic-tac-toe/tree/88c0496520891ee871078adae063a4833960e5eb/client%2Fsrc%2Fcomponents%2FGame%2FGameRules.js)
