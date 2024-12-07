@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego Estilo Mario Bros</title>
+    <title>Juego de Billar</title>
     <style>
         body, html {
             margin: 0;
@@ -13,124 +13,70 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #87CEEB;
+            background-color: #2c2c2c;
             font-family: Arial, sans-serif;
         }
 
-        #game-container {
+        #table {
             position: relative;
             width: 800px;
             height: 400px;
-            background-color: #87CEEB;
-            overflow: hidden;
-            border: 2px solid #000;
+            background-color: #006400;
+            border: 15px solid #8B4513;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
         }
 
-        .player, .platform, .goal {
+        .ball {
             position: absolute;
-        }
-
-        .player {
-            width: 30px;
-            height: 30px;
-            background-color: #FF4500;
-            bottom: 0;
-        }
-
-        .platform {
-            width: 100px;
+            width: 20px;
             height: 20px;
-            background-color: #8B4513;
-        }
-
-        .goal {
-            width: 30px;
-            height: 30px;
-            background-color: #FFD700;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div class="player" id="player"></div>
-        <div class="platform" style="bottom: 50px; left: 0; width: 200px;"></div>
-        <div class="platform" style="bottom: 100px; left: 250px; width: 100px;"></div>
-        <div class="platform" style="bottom: 150px; left: 400px; width: 200px;"></div>
-        <div class="platform" style="bottom: 50px; left: 650px; width: 150px;"></div>
-        <div class="goal" style="bottom: 80px; left: 750px;"></div>
+    <div id="table">
+        <div class="ball" id="cue-ball" style="left: 390px; top: 190px;"></div>
     </div>
     <script>
-        const player = document.getElementById('player');
-        const gameContainer = document.getElementById('game-container');
-        const platforms = document.querySelectorAll('.platform');
-        const goal = document.querySelector('.goal');
-
-        let playerX = 0;
-        let playerY = 0;
+        const table = document.getElementById('table');
+        const cueBall = document.getElementById('cue-ball');
+        let ballX = 390;
+        let ballY = 190;
         let speedX = 0;
         let speedY = 0;
-        const gravity = 0.5;
-        const jumpPower = 10;
-        let onGround = true;
+        const friction = 0.98;
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') speedX = -5;
-            if (e.key === 'ArrowRight') speedX = 5;
-            if (e.key === ' ' && onGround) {
-                speedY = -jumpPower;
-                onGround = false;
-            }
-        });
+        table.addEventListener('click', (e) => {
+            const rect = table.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
 
-        document.addEventListener('keyup', (e) => {
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') speedX = 0;
+            speedX = (clickX - ballX) / 20;
+            speedY = (clickY - ballY) / 20;
         });
 
         function gameLoop() {
-            speedY += gravity;
-            playerX += speedX;
-            playerY += speedY;
+            ballX += speedX;
+            ballY += speedY;
 
-            if (playerX < 0) playerX = 0;
-            if (playerX + player.clientWidth > gameContainer.clientWidth) playerX = gameContainer.clientWidth - player.clientWidth;
-            if (playerY + player.clientHeight > gameContainer.clientHeight) {
-                playerY = gameContainer.clientHeight - player.clientHeight;
-                speedY = 0;
-                onGround = true;
+            speedX *= friction;
+            speedY *= friction;
+
+            if (ballX < 0 || ballX + cueBall.clientWidth > table.clientWidth) {
+                speedX = -speedX;
+            }
+            if (ballY < 0 || ballY + cueBall.clientHeight > table.clientHeight) {
+                speedY = -speedY;
             }
 
-            platforms.forEach(platform => {
-                if (playerX < platform.offsetLeft + platform.clientWidth &&
-                    playerX + player.clientWidth > platform.offsetLeft &&
-                    playerY + player.clientHeight > platform.offsetTop &&
-                    playerY + player.clientHeight - speedY < platform.offsetTop) {
-                    playerY = platform.offsetTop - player.clientHeight;
-                    speedY = 0;
-                    onGround = true;
-                }
-            });
-
-            if (playerX < goal.offsetLeft + goal.clientWidth &&
-                playerX + player.clientWidth > goal.offsetLeft &&
-                playerY + player.clientHeight > goal.offsetTop &&
-                playerY < goal.offsetTop + goal.clientHeight) {
-                alert("¡Ganaste!");
-                resetGame();
-            }
-
-            player.style.left = `${playerX}px`;
-            player.style.bottom = `${playerY}px`;
+            cueBall.style.left = `${ballX}px`;
+            cueBall.style.top = `${ballY}px`;
 
             requestAnimationFrame(gameLoop);
-        }
-
-        function resetGame() {
-            playerX = 0;
-            playerY = 0;
-            speedX = 0;
-            speedY = 0;
-            player.style.left = `${playerX}px`;
-            player.style.bottom = `${playerY}px`;
         }
 
         gameLoop();
