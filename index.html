@@ -27,23 +27,42 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
         }
 
-        .ball {
+        .ball, .hole {
             position: absolute;
             width: 20px;
             height: 20px;
-            background-color: white;
             border-radius: 50%;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .ball {
+            background-color: white;
+        }
+
+        .hole {
+            background-color: black;
+            width: 30px;
+            height: 30px;
         }
     </style>
 </head>
 <body>
     <div id="table">
         <div class="ball" id="cue-ball" style="left: 390px; top: 190px;"></div>
+        <div class="ball" style="background-color: red; left: 200px; top: 100px;"></div>
+        <div class="ball" style="background-color: blue; left: 600px; top: 300px;"></div>
+        <div class="hole" style="left: 0; top: 0;"></div>
+        <div class="hole" style="left: 780px; top: 0;"></div>
+        <div class="hole" style="left: 0; top: 380px;"></div>
+        <div class="hole" style="left: 780px; top: 380px;"></div>
+        <div class="hole" style="left: 390px; top: 0;"></div>
+        <div class="hole" style="left: 390px; top: 380px;"></div>
     </div>
     <script>
         const table = document.getElementById('table');
         const cueBall = document.getElementById('cue-ball');
+        const balls = document.querySelectorAll('.ball');
+        const holes = document.querySelectorAll('.hole');
         let ballX = 390;
         let ballY = 190;
         let speedX = 0;
@@ -58,6 +77,23 @@
             speedX = (clickX - ballX) / 20;
             speedY = (clickY - ballY) / 20;
         });
+
+        function checkCollisions() {
+            balls.forEach((ball, index) => {
+                let ballLeft = parseFloat(ball.style.left);
+                let ballTop = parseFloat(ball.style.top);
+
+                holes.forEach(hole => {
+                    if (ballLeft < hole.offsetLeft + hole.clientWidth &&
+                        ballLeft + ball.clientWidth > hole.offsetLeft &&
+                        ballTop < hole.offsetTop + hole.clientHeight &&
+                        ballTop + ball.clientHeight > hole.offsetTop) {
+                        ball.style.display = 'none';
+                        balls[index].remove();
+                    }
+                });
+            });
+        }
 
         function gameLoop() {
             ballX += speedX;
@@ -75,6 +111,8 @@
 
             cueBall.style.left = `${ballX}px`;
             cueBall.style.top = `${ballY}px`;
+
+            checkCollisions();
 
             requestAnimationFrame(gameLoop);
         }
