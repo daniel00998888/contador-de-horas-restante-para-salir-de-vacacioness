@@ -187,6 +187,7 @@
                 document.getElementById('post-content').value = '';
                 fileInput.value = '';
                 loadPosts();
+                notifyAllUsers();
             }
 
             if (file) {
@@ -233,6 +234,10 @@
             });
         }
 
+        function notifyAllUsers() {
+            window.localStorage.setItem('newPostNotification', Date.now());
+        }
+
         function logout() {
             localStorage.removeItem('loggedInUser');
             showLoginForm();
@@ -249,7 +254,7 @@
         });
 
         window.addEventListener('storage', function(e) {
-            if (e.key === 'posts') {
+            if (e.key === 'newPostNotification') {
                 loadPosts();
             }
         });
