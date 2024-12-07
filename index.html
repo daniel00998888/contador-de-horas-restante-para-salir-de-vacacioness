@@ -107,17 +107,60 @@
                         if (distance < ball.element.clientWidth) {
                             // Resolver colisión
                             let angle = Math.atan2(dy, dx);
-                            let totalSpeed = Math.sqrt(ball.speedX * ball.speedX + ball.speedY * ball.speedY) +
-                                            Math.sqrt(otherBall.speedX * otherBall.speedX + otherBall.speedY * otherBall.speedY);
+                            let sin = Math.sin(angle);
+                            let cos = Math.cos(angle);
 
-                            ball.speedX = totalSpeed * Math.cos(angle);
-                            ball.speedY = totalSpeed * Math.sin(angle);
-                            otherBall.speedX = totalSpeed * Math.cos(angle + Math.PI);
-                            otherBall.speedY = totalSpeed * Math.sin(angle + Math.PI);
+                            // Rotar las coordenadas del sistema
+                            let pos0 = { x: 0, y: 0 }; // Ball position
+                            let pos1 = rotate(dx, dy, sin, cos, true);
+
+                            // Rotar las velocidades del sistema
+                            let vel0 = rotate(ball.speedX, ball.speedY, sin, cos, true);
+                            let vel1 = rotate(otherBall.speedX, otherBall.speedY, sin, cos, true);
+
+                            // Colisión de bolas
+                            let vxTotal = vel0.x - vel1.x;
+                            vel0.x = ((ball.mass - otherBall.mass) * vel0.x + 2 * otherBall.mass * vel1.x) /
+                                     (ball.mass + otherBall.mass);
+                            vel1.x = vxTotal + vel0.x;
+
+                            // Volver a las coordenadas originales
+                            let absV = Math.abs(vel0.x) + Math.abs(vel1.x);
+                            let overlap = (ball.element.clientWidth - Math.abs(pos0.x - pos1.x)) / absV;
+
+                            pos0.x += vel0.x * overlap;
+                            pos1.x += vel1.x * overlap;
+
+                            // Volver a las coordenadas originales
+                            let pos0F = rotate(pos0.x, pos0.y, sin, cos, false);
+                            let pos1F = rotate(pos1.x, pos1.y, sin, cos, false);
+
+                            // Actualizar posiciones
+                            otherBall.x = ball.x + pos1F.x;
+                            otherBall.y = ball.y + pos1F.y;
+                            ball.x = ball.x + pos0F.x;
+                            ball.y = ball.y + pos0F.y;
+
+                            // Volver a las velocidades originales
+                            let vel0F = rotate(vel0.x, vel0.y, sin, cos, false);
+                            let vel1F = rotate(vel1.x, vel1.y, sin, cos, false);
+
+                            // Actualizar velocidades
+                            ball.speedX = vel0F.x;
+                            ball.speedY = vel0F.y;
+                            otherBall.speedX = vel1F.x;
+                            otherBall.speedY = vel1F.y;
                         }
                     }
                 }
             });
+        }
+
+        function rotate(x, y, sin, cos, reverse) {
+            return {
+                x: (reverse) ? (x * cos + y * sin) : (x * cos - y * sin),
+                y: (reverse) ? (y * cos - x * sin) : (y * cos + x * sin)
+            };
         }
 
         function gameLoop() {
