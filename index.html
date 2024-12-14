@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ver Programas en Directo</title>
+    <title>Resultados en Vivo de la Liga MX</title>
     <style>
         body {
             display: flex;
@@ -19,86 +19,99 @@
             background-color: #333;
             color: white;
             width: 100%;
-            padding: 10px 0;
+            padding: 20px 0;
             text-align: center;
         }
-        #player-container {
+        #results-container {
             width: 80%;
             max-width: 800px;
             margin: 20px 0;
         }
-        video {
+        table {
             width: 100%;
-            height: auto;
-            border: 2px solid #333;
+            border-collapse: collapse;
         }
-        #channel-list {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+        th, td {
+            padding: 10px;
+            border: 1px solid #333;
+            text-align: center;
         }
-        .channel-button {
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
-            margin: 5px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        .channel-button:hover {
+        th {
             background-color: #555;
+            color: white;
         }
         footer {
             margin-top: auto;
             background-color: #333;
             color: white;
             width: 100%;
-            padding: 10px 0;
+            padding: 20px 0;
             text-align: center;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Programas en Directo</h1>
+        <h1>Resultados en Vivo de la Liga MX</h1>
     </header>
-    <div id="channel-list">
-        <button class="channel-button" data-src="https://example.com/live-stream1.mp4">Canal 1</button>
-        <button class="channel-button" data-src="https://example.com/live-stream2.mp4">Canal 2</button>
-        <button class="channel-button" data-src="https://example.com/live-stream3.mp4">Canal 3</button>
-        <button class="channel-button" data-src="https://example.com/live-stream4.mp4">Canal 4</button>
-        <button class="channel-button" data-src="https://www.youtube.com/live/Gmb3tidoyqA?si=VV70OPvo7qKG4qB1.mp4">Canal 5</button>
-        <button class="channel-button" data-src="https://example.com/live-stream6.mp4">Canal 6</button>
-        <button class="channel-button" data-src="https://example.com/live-stream7.mp4">Canal 7</button>
-        <button class="channel-button" data-src="https://example.com/live-stream8.mp4">Canal 8</button>
-        <button class="channel-button" data-src="https://example.com/live-stream9.mp4">Canal 9</button>
-        <button class="channel-button" data-src="https://example.com/live-stream10.mp4">Canal 10</button>
-    </div>
-    <div id="player-container">
-        <video id="video-player" controls>
-            <source id="video-source" src="https://example.com/live-stream1.mp4" type="video/mp4">
-            Tu navegador no soporta la reproducción de videos.
-        </video>
+    <div id="results-container">
+        <table id="results-table">
+            <thead>
+                <tr>
+                    <th>Equipo Local</th>
+                    <th>Resultado</th>
+                    <th>Equipo Visitante</th>
+                    <th>Hora</th>
+                </tr>
+            </thead>
+            <tbody id="results-body">
+                <!-- Aquí se agregarán los resultados en vivo -->
+                <tr>
+                    <td>América</td>
+                    <td>1 - 0</td>
+                    <td>Chivas</td>
+                    <td>18:00</td>
+                </tr>
+                <tr>
+                    <td>Pumas</td>
+                    <td>2 - 2</td>
+                    <td>Cruz Azul</td>
+                    <td>19:00</td>
+                </tr>
+                <tr>
+                    <td>Tigres</td>
+                    <td>0 - 3</td>
+                    <td>Monterrey</td>
+                    <td>20:00</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
     <footer>
-        <p>&copy; 2024 Programas en Directo</p>
+        <p>&copy; 2024 Resultados en Vivo de la Liga MX</p>
     </footer>
     <script>
-        const buttons = document.querySelectorAll('.channel-button');
-        const videoPlayer = document.getElementById('video-player');
-        const videoSource = document.getElementById('video-source');
+        function updateResults() {
+            const resultsBody = document.getElementById('results-body');
+            // Aquí podrías agregar el código para actualizar los resultados en vivo desde una API.
+            // Por ahora, se usarán datos ficticios.
+            const newResults = [
+                { local: "América", resultado: "1 - 0", visitante: "Chivas", hora: "18:00" },
+                { local: "Pumas", resultado: "2 - 2", visitante: "Cruz Azul", hora: "19:00" },
+                { local: "Tigres", resultado: "0 - 3", visitante: "Monterrey", hora: "20:00" },
+                // Agregar más resultados ficticios si se desea
+            ];
 
-        buttons.forEach(button => {
-            button.addEventListener('click', () => {
-                const src = button.getAttribute('data-src');
-                videoSource.src = src;
-                videoPlayer.load();
-                videoPlayer.play();
+            resultsBody.innerHTML = ''; // Limpiar resultados anteriores
+            newResults.forEach(match => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${match.local}</td><td>${match.resultado}</td><td>${match.visitante}</td><td>${match.hora}</td>`;
+                resultsBody.appendChild(row);
             });
-        });
+        }
+
+        // Llamar a la función para actualizar resultados cada minuto (60000 ms)
+        setInterval(updateResults, 60000);
     </script>
 </body>
 </html>
