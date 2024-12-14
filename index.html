@@ -3,103 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Plinko en 3D</title>
+    <title>Ruleta de Colores</title>
     <style>
         body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
             margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        #wheel {
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            border: 10px solid #333;
+            position: relative;
             overflow: hidden;
         }
-        canvas {
-            display: block;
+        .segment {
+            position: absolute;
+            width: 200px;
+            height: 400px;
+            background-color: red;
+            clip-path: polygon(100% 0%, 100% 100%, 0% 100%);
+            transform-origin: 100% 50%;
+        }
+        #pointer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 30px solid #333;
+            z-index: 10;
+        }
+        #spinButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/OrbitControls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/physi@1.2.1/build/physi.min.js"></script>
+    <div id="wheel">
+        <div id="pointer"></div>
+    </div>
+    <button id="spinButton">Girar</button>
+    <div id="result"></div>
     <script>
-        // Configurar la escena, la cámara y el renderizador
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        const wheel = document.getElementById('wheel');
+        const spinButton = document.getElementById('spinButton');
+        const resultDiv = document.getElementById('result');
 
-        // Agregar controles de órbita para la cámara
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        const segments = [
+            { color: 'red', points: 10 },
+            { color: 'orange', points: 20 },
+            { color: 'yellow', points: 30 },
+            { color: 'green', points: 100 },  // Más puntos, menos probabilidad
+            { color: 'blue', points: 200 },   // Más puntos, menos probabilidad
+            { color: 'purple', points: 40 },
+            { color: 'pink', points: 50 },
+            { color: 'cyan', points: 60 }
+        ];
 
-        // Configurar Physi.js
-        Physijs.scripts.worker = 'https://cdn.jsdelivr.net/npm/physi@1.2.1/build/physijs_worker.min.js';
-        Physijs.scripts.ammo = 'https://cdn.jsdelivr.net/npm/physi@1.2.1/build/ammo.min.js';
+        // Probabilidades
+        const probabilities = [1, 1, 1, 0.5, 0.25, 1, 1, 1];
 
-        // Crear el suelo
-        const ground = new Physijs.BoxMesh(
-            new THREE.BoxGeometry(50, 1, 50),
-            new THREE.MeshStandardMaterial({color: 0x00ff00}),
-            0 // Masa 0 para que no se mueva
-        );
-        ground.position.y = -5;
-        scene.add(ground);
-
-        // Crear los pines
-        const pegGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1, 32);
-        const pegMaterial = new THREE.MeshStandardMaterial({color: 0xff0000});
-        for (let y = -3; y < 4; y += 2) {
-            for (let x = -4; x < 5; x += 2) {
-                const peg = new Physijs.CylinderMesh(pegGeometry, pegMaterial, 0);
-                peg.position.set(x, y, 0);
-                scene.add(peg);
-            }
-        }
-
-        // Crear las ranuras de premios
-        const slotMaterial = new THREE.MeshStandardMaterial({color: 0x0000ff});
-        for (let i = -4; i < 5; i++) {
-            const slot = new Physijs.BoxMesh(
-                new THREE.BoxGeometry(1.8, 1, 1),
-                slotMaterial,
-                0
-            );
-            slot.position.set(i * 2, -4, 0);
-            scene.add(slot);
-        }
-
-        // Crear la pelota
-        function dropBall() {
-            const ballGeometry = new THREE.SphereGeometry(0.5, 32, 32);
-            const ballMaterial = new THREE.MeshStandardMaterial({color: 0xffff00});
-            const ball = new Physijs.SphereMesh(ballGeometry, ballMaterial);
-            ball.position.set(0, 5, 0);
-            scene.add(ball);
-        }
-
-        // Agregar luz
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(0, 10, 10).normalize();
-        scene.add(light);
-
-        camera.position.z = 10;
-        controls.update();
-
-        // Loop de animación
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-            scene.simulate();
-            controls.update();
-        }
-        animate();
-
-        // Evento de clic para soltar la pelota
-        window.addEventListener('click', dropBall);
-
-        // Ajuste de la pantalla
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        // Crear segmentos en la ruleta
+        segments.forEach((segment, index) => {
+            const seg = document.createElement('div');
+            seg.className = 'segment';
+            seg.style.backgroundColor = segment.color;
+            seg.style.transform = `rotate(${index * (360 / segments.length)}deg)`;
+            seg.style.zIndex = `${segments.length - index}`;
+            wheel.appendChild(seg);
         });
+
+        function spinWheel() {
+            const totalWeight = probabilities.reduce((total, weight) => total + weight, 0);
+            let randomWeight = Math.random() * totalWeight;
+
+            let chosenIndex = 0;
+            for (let i = 0; i < probabilities.length; i++) {
+                randomWeight -= probabilities[i];
+                if (randomWeight <= 0) {
+                    chosenIndex = i;
+                    break;
+                }
+            }
+
+            const rotation = (chosenIndex * (360 / segments.length)) + (360 * 5) + (Math.random() * 360);
+
+            wheel.style.transition = 'transform 5s ease-out';
+            wheel.style.transform = `rotate(-${rotation}deg)`;
+
+            setTimeout(() => {
+                const segment = segments[chosenIndex];
+                resultDiv.textContent = `¡Has ganado ${segment.points} puntos con el color ${segment.color}!`;
+            }, 5000);
+        }
+
+        spinButton.addEventListener('click', spinWheel);
     </script>
 </body>
 </html>
