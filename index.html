@@ -32,6 +32,25 @@
             height: auto;
             border: 2px solid #333;
         }
+        #channel-list {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .channel-button {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .channel-button:hover {
+            background-color: #555;
+        }
         footer {
             margin-top: auto;
             background-color: #333;
@@ -46,14 +65,40 @@
     <header>
         <h1>Programas en Directo</h1>
     </header>
+    <div id="channel-list">
+        <button class="channel-button" data-src="https://example.com/live-stream1.mp4">Canal 1</button>
+        <button class="channel-button" data-src="https://example.com/live-stream2.mp4">Canal 2</button>
+        <button class="channel-button" data-src="https://example.com/live-stream3.mp4">Canal 3</button>
+        <button class="channel-button" data-src="https://example.com/live-stream4.mp4">Canal 4</button>
+        <button class="channel-button" data-src="https://example.com/live-stream5.mp4">Canal 5</button>
+        <button class="channel-button" data-src="https://example.com/live-stream6.mp4">Canal 6</button>
+        <button class="channel-button" data-src="https://example.com/live-stream7.mp4">Canal 7</button>
+        <button class="channel-button" data-src="https://example.com/live-stream8.mp4">Canal 8</button>
+        <button class="channel-button" data-src="https://example.com/live-stream9.mp4">Canal 9</button>
+        <button class="channel-button" data-src="https://example.com/live-stream10.mp4">Canal 10</button>
+    </div>
     <div id="player-container">
         <video id="video-player" controls>
-            <source src="https://www.example.com/live-stream" type="video/mp4">
+            <source id="video-source" src="https://example.com/live-stream1.mp4" type="video/mp4">
             Tu navegador no soporta la reproducción de videos.
         </video>
     </div>
     <footer>
         <p>&copy; 2024 Programas en Directo</p>
     </footer>
+    <script>
+        const buttons = document.querySelectorAll('.channel-button');
+        const videoPlayer = document.getElementById('video-player');
+        const videoSource = document.getElementById('video-source');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const src = button.getAttribute('data-src');
+                videoSource.src = src;
+                videoPlayer.load();
+                videoPlayer.play();
+            });
+        });
+    </script>
 </body>
 </html>
