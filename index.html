@@ -3,121 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Plinko</title>
+    <title>Juego de Plinko en 3D</title>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
             margin: 0;
-        }
-        #plinko-board {
-            position: relative;
-            width: 300px;
-            height: 500px;
-            background-color: #fff;
-            border: 2px solid #000;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
             overflow: hidden;
         }
-        .peg {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: #000;
-            border-radius: 50%;
-        }
-        .disk {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #ff0000;
-            border-radius: 50%;
-        }
-        .slot {
-            position: absolute;
-            width: 60px;
-            height: 20px;
-            background-color: #ddd;
-            bottom: 0;
-            border-top: 2px solid #000;
-            text-align: center;
-            line-height: 20px;
+        canvas {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <div id="plinko-board"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/OrbitControls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/physi@1.2.1/build/physi.min.js"></script>
     <script>
-        const board = document.getElementById('plinko-board');
+        // Configurar la escena, la cámara y el renderizador
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-        // Crear pines
-        for (let y = 50; y < 400; y += 50) {
-            for (let x = y % 100 === 0 ? 25 : 50; x < 300; x += 50) {
-                const peg = document.createElement('div');
-                peg.className = 'peg';
-                peg.style.left = `${x}px`;
-                peg.style.top = `${y}px`;
-                board.appendChild(peg);
+        // Agregar controles de órbita para la cámara
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        // Configurar Physi.js
+        Physi.scripts.worker = 'https://cdn.jsdelivr.net/npm/physi@1.2.1/build/physijs_worker.min.js';
+        Physi.scripts.ammo = 'https://cdn.jsdelivr.net/npm/physi@1.2.1/build/ammo.min.js';
+
+        // Crear el suelo
+        const ground = new Physi.BoxMesh(
+            new THREE.BoxGeometry(50, 1, 50),
+            new THREE.MeshStandardMaterial({color: 0x00ff00}),
+            0 // Masa 0 para que no se mueva
+        );
+        ground.position.y = -5;
+        scene.add(ground);
+
+        // Crear los pines
+        const pegGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1, 32);
+        const pegMaterial = new THREE.MeshStandardMaterial({color: 0xff0000});
+        for (let y = -3; y < 4; y += 2) {
+            for (let x = -4; x < 5; x += 2) {
+                const peg = new Physi.CylinderMesh(pegGeometry, pegMaterial, 0);
+                peg.position.set(x, y, 0);
+                scene.add(peg);
             }
         }
 
-        // Crear slots de premios
-        const slots = [100, 200, 300, 400, 500];
-        slots.forEach((points, index) => {
-            const slot = document.createElement('div');
-            slot.className = 'slot';
-            slot.style.left = `${index * 60}px`;
-            slot.textContent = points;
-            board.appendChild(slot);
+        // Crear las ranuras de premios
+        const slotMaterial = new THREE.MeshStandardMaterial({color: 0x0000ff});
+        for (let i = -4; i < 5; i++) {
+            const slot = new Physi.BoxMesh(
+                new THREE.BoxGeometry(1.8, 1, 1),
+                slotMaterial,
+                0
+            );
+            slot.position.set(i * 2, -4, 0);
+            scene.add(slot);
+        }
+
+        // Crear la pelota
+        function dropBall() {
+            const ballGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+            const ballMaterial = new THREE.MeshStandardMaterial({color: 0xffff00});
+            const ball = new Physi.SphereMesh(ballGeometry, ballMaterial);
+            ball.position.set(0, 5, 0);
+            scene.add(ball);
+        }
+
+        // Agregar luz
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(0, 10, 10).normalize();
+        scene.add(light);
+
+        camera.position.z = 10;
+        controls.update();
+
+        // Loop de animación
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+            scene.simulate();
+            controls.update();
+        }
+        animate();
+
+        // Evento de clic para soltar la pelota
+        window.addEventListener('click', dropBall);
+
+        // Ajuste de la pantalla
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        // Función para soltar el disco
-        function dropDisk() {
-            const disk = document.createElement('div');
-            disk.className = 'disk';
-            disk.style.left = '140px';
-            disk.style.top = '0px';
-            board.appendChild(disk);
-
-            let y = 0;
-            let speedX = 0;
-            let speedY = 2;
-
-            function moveDisk() {
-                const rect = disk.getBoundingClientRect();
-                if (rect.bottom >= board.clientHeight) {
-                    clearInterval(interval);
-                    return;
-                }
-
-                // Colisiones con los pines
-                document.querySelectorAll('.peg').forEach(peg => {
-                    const pegRect = peg.getBoundingClientRect();
-                    if (
-                        rect.left < pegRect.left + pegRect.width &&
-                        rect.left + rect.width > pegRect.left &&
-                        rect.top < pegRect.top + pegRect.height &&
-                        rect.top + rect.height > pegRect.top
-                    ) {
-                        speedY = 2;  // Resetea la velocidad Y
-                        speedX = Math.random() < 0.5 ? -2 : 2;  // Rebote aleatorio a izquierda o derecha
-                    }
-                });
-
-                // Movimiento del disco
-                y += speedY;
-                disk.style.top = `${y}px`;
-                disk.style.left = `${parseFloat(disk.style.left) + speedX}px`;
-            }
-
-            const interval = setInterval(moveDisk, 10);
-        }
-
-        // Detectar clic para soltar el disco
-        board.addEventListener('click', dropDisk);
     </script>
 </body>
 </html>
