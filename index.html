@@ -30,11 +30,11 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
         // Configurar Physi.js
-        Physi.scripts.worker = 'https://cdn.jsdelivr.net/npm/physi@1.2.1/build/physijs_worker.min.js';
-        Physi.scripts.ammo = 'https://cdn.jsdelivr.net/npm/physi@1.2.1/build/ammo.min.js';
+        Physijs.scripts.worker = 'https://cdn.jsdelivr.net/npm/physi@1.2.1/build/physijs_worker.min.js';
+        Physijs.scripts.ammo = 'https://cdn.jsdelivr.net/npm/physi@1.2.1/build/ammo.min.js';
 
         // Crear el suelo
-        const ground = new Physi.BoxMesh(
+        const ground = new Physijs.BoxMesh(
             new THREE.BoxGeometry(50, 1, 50),
             new THREE.MeshStandardMaterial({color: 0x00ff00}),
             0 // Masa 0 para que no se mueva
@@ -47,7 +47,7 @@
         const pegMaterial = new THREE.MeshStandardMaterial({color: 0xff0000});
         for (let y = -3; y < 4; y += 2) {
             for (let x = -4; x < 5; x += 2) {
-                const peg = new Physi.CylinderMesh(pegGeometry, pegMaterial, 0);
+                const peg = new Physijs.CylinderMesh(pegGeometry, pegMaterial, 0);
                 peg.position.set(x, y, 0);
                 scene.add(peg);
             }
@@ -56,7 +56,7 @@
         // Crear las ranuras de premios
         const slotMaterial = new THREE.MeshStandardMaterial({color: 0x0000ff});
         for (let i = -4; i < 5; i++) {
-            const slot = new Physi.BoxMesh(
+            const slot = new Physijs.BoxMesh(
                 new THREE.BoxGeometry(1.8, 1, 1),
                 slotMaterial,
                 0
@@ -69,7 +69,7 @@
         function dropBall() {
             const ballGeometry = new THREE.SphereGeometry(0.5, 32, 32);
             const ballMaterial = new THREE.MeshStandardMaterial({color: 0xffff00});
-            const ball = new Physi.SphereMesh(ballGeometry, ballMaterial);
+            const ball = new Physijs.SphereMesh(ballGeometry, ballMaterial);
             ball.position.set(0, 5, 0);
             scene.add(ball);
         }
