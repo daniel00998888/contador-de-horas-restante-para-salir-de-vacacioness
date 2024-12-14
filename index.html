@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruleta de Colores</title>
+    <title>Ver Programas en Directo</title>
     <style>
         body {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -14,106 +15,45 @@
             margin: 0;
             font-family: Arial, sans-serif;
         }
-        #wheel {
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
-            border: 10px solid #333;
-            position: relative;
-            overflow: hidden;
+        header {
+            background-color: #333;
+            color: white;
+            width: 100%;
+            padding: 10px 0;
+            text-align: center;
         }
-        .segment {
-            position: absolute;
-            width: 200px;
-            height: 400px;
-            background-color: red;
-            clip-path: polygon(100% 0%, 100% 100%, 0% 100%);
-            transform-origin: 100% 50%;
+        #player-container {
+            width: 80%;
+            max-width: 800px;
+            margin: 20px 0;
         }
-        #pointer {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 0;
-            height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-bottom: 30px solid #333;
-            z-index: 10;
+        video {
+            width: 100%;
+            height: auto;
+            border: 2px solid #333;
         }
-        #spinButton {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 20px;
+        footer {
+            margin-top: auto;
+            background-color: #333;
+            color: white;
+            width: 100%;
+            padding: 10px 0;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div id="wheel">
-        <div id="pointer"></div>
+    <header>
+        <h1>Programas en Directo</h1>
+    </header>
+    <div id="player-container">
+        <video id="video-player" controls>
+            <source src="https://www.example.com/live-stream" type="video/mp4">
+            Tu navegador no soporta la reproducción de videos.
+        </video>
     </div>
-    <button id="spinButton">Girar</button>
-    <div id="result"></div>
-    <script>
-        const wheel = document.getElementById('wheel');
-        const spinButton = document.getElementById('spinButton');
-        const resultDiv = document.getElementById('result');
-
-        const segments = [
-            { color: 'red', points: 10 },
-            { color: 'orange', points: 20 },
-            { color: 'yellow', points: 30 },
-            { color: 'green', points: 100 },  // Más puntos, menos probabilidad
-            { color: 'blue', points: 200 },   // Más puntos, menos probabilidad
-            { color: 'purple', points: 40 },
-            { color: 'pink', points: 50 },
-            { color: 'cyan', points: 60 }
-        ];
-
-        // Probabilidades
-        const probabilities = [1, 1, 1, 0.5, 0.25, 1, 1, 1];
-
-        // Crear segmentos en la ruleta
-        segments.forEach((segment, index) => {
-            const seg = document.createElement('div');
-            seg.className = 'segment';
-            seg.style.backgroundColor = segment.color;
-            seg.style.transform = `rotate(${index * (360 / segments.length)}deg)`;
-            seg.style.zIndex = `${segments.length - index}`;
-            wheel.appendChild(seg);
-        });
-
-        function spinWheel() {
-            const totalWeight = probabilities.reduce((total, weight) => total + weight, 0);
-            let randomWeight = Math.random() * totalWeight;
-
-            let chosenIndex = 0;
-            for (let i = 0; i < probabilities.length; i++) {
-                randomWeight -= probabilities[i];
-                if (randomWeight <= 0) {
-                    chosenIndex = i;
-                    break;
-                }
-            }
-
-            const rotation = (chosenIndex * (360 / segments.length)) + (360 * 5) + (Math.random() * 360);
-
-            wheel.style.transition = 'transform 5s ease-out';
-            wheel.style.transform = `rotate(-${rotation}deg)`;
-
-            setTimeout(() => {
-                const segment = segments[chosenIndex];
-                resultDiv.textContent = `¡Has ganado ${segment.points} puntos con el color ${segment.color}!`;
-            }, 5000);
-        }
-
-        spinButton.addEventListener('click', spinWheel);
-    </script>
+    <footer>
+        <p>&copy; 2024 Programas en Directo</p>
+    </footer>
 </body>
 </html>
