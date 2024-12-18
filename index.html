@@ -3,109 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reflexión Espiritual</title>
+    <title>Chat con IA</title>
     <style>
         body {
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh;
             background-color: #f0f0f0;
             margin: 0;
             font-family: Arial, sans-serif;
-            text-align: center;
         }
-        h1 {
-            color: #444;
-            margin-bottom: 20px;
-        }
-        .content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        #chatContainer {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             width: 80%;
             max-width: 600px;
+            height: 80vh;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        #verse {
-            font-size: 1.2em;
-            color: #555;
+        #chatBox {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+        }
+        .message {
             margin-bottom: 20px;
         }
-        #prayer {
-            font-size: 1em;
-            color: #666;
-            margin-bottom: 20px;
+        .message.user {
+            text-align: right;
         }
-        select {
-            margin-top: 20px;
+        .message.bot {
+            text-align: left;
+        }
+        #inputContainer {
+            display: flex;
             padding: 10px;
-            font-size: 1em;
-            cursor: pointer;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border-top: 1px solid #ddd;
+        }
+        #userInput {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         button {
-            margin-top: 20px;
             padding: 10px 20px;
-            font-size: 1em;
-            cursor: pointer;
-            background-color: #444;
-            color: #fff;
+            margin-left: 10px;
             border: none;
-            border-radius: 5px;
-        }
-        img {
-            margin-top: 20px;
-            display: none;
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h1>Reflexión Espiritual</h1>
-    <div class="content">
-        <select id="verseSelector" onchange="updateVerse()">
-            <!-- Opciones cargadas dinámicamente -->
-        </select>
-        <div id="verse">"Ama a tu prójimo como a ti mismo." - Mateo 22:39</div>
-        <div id="prayer">
-            <p>Oración del día:</p>
-            <p>Señor, concédenos la gracia de ser siempre justos en nuestras acciones y compasivos en nuestros corazones. Amén.</p>
+    <div id="chatContainer">
+        <div id="chatBox"></div>
+        <div id="inputContainer">
+            <input type="text" id="userInput" placeholder="Escribe tu mensaje aquí...">
+            <button onclick="sendMessage()">Enviar</button>
         </div>
-        <button onclick="showImage()">Ver Imagen</button>
-        <img id="religiousImage" src="path_to_your_image.jpg" alt="Imagen Religiosa">
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            fetch('versiculos.json')
-                .then(response => response.json())
-                .then(versiculos => {
-                    const selector = document.getElementById('verseSelector');
-                    versiculos.forEach(versiculo => {
-                        const option = document.createElement('option');
-                        option.value = versiculo.referencia;
-                        option.textContent = `${versiculo.texto} - ${versiculo.referencia}`;
-                        selector.appendChild(option);
-                    });
-                    updateVerse(); // Inicializar el primer versículo
-                })
-                .catch(error => console.error('Error al cargar los versículos:', error));
+        const chatBox = document.getElementById('chatBox');
+        const userInput = document.getElementById('userInput');
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessageToChat('user', message);
+                userInput.value = '';
+                getBotResponse(message);
+            }
+        }
+
+        function addMessageToChat(sender, message) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function getBotResponse(message) {
+            const responses = {
+                "hola": "¡Hola! ¿Cómo estás?",
+                "¿cuál es tu nombre?": "Soy un asistente virtual, creado para ayudarte.",
+                "¿cómo estás?": "Estoy aquí para ayudarte.",
+                "adiós": "¡Adiós! Que tengas un buen día."
+            };
+            const response = responses[message.toLowerCase()] || "Lo siento, no entiendo tu mensaje.";
+            setTimeout(() => addMessageToChat('bot', response), 500);
+        }
+
+        userInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
         });
-
-        function updateVerse() {
-            const selector = document.getElementById('verseSelector');
-            const verse = document.getElementById('verse');
-            verse.textContent = selector.options[selector.selectedIndex].text;
-        }
-
-        function showImage() {
-            const img = document.getElementById('religiousImage');
-            img.style.display = img.style.display === 'none' ? 'block' : 'none';
-        }
     </script>
 </body>
 </html>
