@@ -80,8 +80,13 @@
         function machineMove() {
             const emptyCells = cells.filter(cell => cell.textContent === '');
             if (emptyCells.length === 0) return;
-            const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            randomCell.textContent = 'O';
+
+            // Estrategia de la máquina: bloquear o ganar
+            const winningMove = findBestMove('O');
+            const blockingMove = findBestMove('X');
+            const bestMove = winningMove !== -1 ? winningMove : (blockingMove !== -1 ? blockingMove : emptyCells[Math.floor(Math.random() * emptyCells.length)]);
+            
+            cells[bestMove].textContent = 'O';
             if (checkWin('O')) {
                 message.textContent = 'O gana!';
                 gameOver = true;
@@ -93,6 +98,20 @@
             } else {
                 currentPlayer = 'X';
             }
+        }
+
+        function findBestMove(player) {
+            for (let i = 0; i < cells.length; i++) {
+                if (cells[i].textContent === '') {
+                    cells[i].textContent = player;
+                    if (checkWin(player)) {
+                        cells[i].textContent = '';
+                        return i;
+                    }
+                    cells[i].textContent = '';
+                }
+            }
+            return -1;
         }
 
         function checkWin(player) {
