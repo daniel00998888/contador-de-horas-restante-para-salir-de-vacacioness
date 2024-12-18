@@ -59,6 +59,15 @@
             height: auto;
             border-radius: 8px;
         }
+        .read-aloud {
+            margin-top: 1em;
+            padding: 10px 20px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -96,6 +105,7 @@
                 <li>Asar la carne en un trompo o sartén hasta que esté bien cocida.</li>
                 <li>Calentar las tortillas y servir la carne con piña, cilantro y cebolla.</li>
             </ol>
+            <button class="read-aloud" onclick="readAloud('tacos-al-pastor')">Leer en Voz Alta</button>
         </div>
         <div id="enchiladas-verdes" class="recipe-details">
             <h2>Enchiladas Verdes</h2>
@@ -121,6 +131,7 @@
                 <li>Colocar las tortillas rellenas en un plato y bañarlas con la salsa verde.</li>
                 <li>Agregar crema, queso fresco y cilantro por encima.</li>
             </ol>
+            <button class="read-aloud" onclick="readAloud('enchiladas-verdes')">Leer en Voz Alta</button>
         </div>
         <div id="chiles-en-nogada" class="recipe-details">
             <h2>Chiles en Nogada</h2>
@@ -151,6 +162,7 @@
                 <li>Para la nogada, licuar la crema con las nueces hasta obtener una salsa homogénea.</li>
                 <li>Servir los chiles bañados con la nogada y decorar con granada.</li>
             </ol>
+            <button class="read-aloud" onclick="readAloud('chiles-en-nogada')">Leer en Voz Alta</button>
         </div>
     </div>
     <script>
@@ -158,6 +170,13 @@
             const recipes = document.querySelectorAll('.recipe-details');
             recipes.forEach(recipe => recipe.classList.remove('active'));
             document.getElementById(recipeId).classList.add('active');
+        }
+
+        function readAloud(recipeId) {
+            const recipe = document.getElementById(recipeId);
+            const recipeText = recipe.innerText;
+            const utterance = new SpeechSynthesisUtterance(recipeText);
+            speechSynthesis.speak(utterance);
         }
     </script>
 </body>
