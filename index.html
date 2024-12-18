@@ -10,33 +10,48 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             background-color: #f0f0f0;
             margin: 0;
             font-family: Arial, sans-serif;
             text-align: center;
         }
         h1 {
-            color: #333;
+            color: #444;
+            margin-bottom: 20px;
         }
         .content {
-            margin: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
         }
-        #quote {
+        #verse {
             font-size: 1.2em;
-            color: #666;
+            color: #555;
+            margin-bottom: 20px;
         }
         #prayer {
             font-size: 1em;
-            color: #555;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        select {
             margin-top: 20px;
+            padding: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         button {
             margin-top: 20px;
             padding: 10px 20px;
             font-size: 1em;
             cursor: pointer;
-            background-color: #333;
+            background-color: #444;
             color: #fff;
             border: none;
             border-radius: 5px;
@@ -44,15 +59,19 @@
         img {
             margin-top: 20px;
             display: none;
-            width: 300px;
+            width: 100%;
             height: auto;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
     <h1>Reflexión Espiritual</h1>
     <div class="content">
-        <div id="quote">"Ama a tu prójimo como a ti mismo." - Mateo 22:39</div>
+        <select id="verseSelector" onchange="updateVerse()">
+            <!-- Opciones cargadas dinámicamente -->
+        </select>
+        <div id="verse">"Ama a tu prójimo como a ti mismo." - Mateo 22:39</div>
         <div id="prayer">
             <p>Oración del día:</p>
             <p>Señor, concédenos la gracia de ser siempre justos en nuestras acciones y compasivos en nuestros corazones. Amén.</p>
@@ -61,6 +80,28 @@
         <img id="religiousImage" src="path_to_your_image.jpg" alt="Imagen Religiosa">
     </div>
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('versiculos.json')
+                .then(response => response.json())
+                .then(versiculos => {
+                    const selector = document.getElementById('verseSelector');
+                    versiculos.forEach(versiculo => {
+                        const option = document.createElement('option');
+                        option.value = versiculo.referencia;
+                        option.textContent = `${versiculo.texto} - ${versiculo.referencia}`;
+                        selector.appendChild(option);
+                    });
+                    updateVerse(); // Inicializar el primer versículo
+                })
+                .catch(error => console.error('Error al cargar los versículos:', error));
+        });
+
+        function updateVerse() {
+            const selector = document.getElementById('verseSelector');
+            const verse = document.getElementById('verse');
+            verse.textContent = selector.options[selector.selectedIndex].text;
+        }
+
         function showImage() {
             const img = document.getElementById('religiousImage');
             img.style.display = img.style.display === 'none' ? 'block' : 'none';
