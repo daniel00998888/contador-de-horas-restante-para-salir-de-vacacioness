@@ -174,10 +174,11 @@
 
         function readAloud(recipeId) {
             const recipe = document.getElementById(recipeId);
-            const recipeText = recipe.innerText;
-            const utterance = new SpeechSynthesisUtterance(recipeText);
-            speechSynthesis.speak(utterance);
-        }
+            const title = recipe.querySelector('h2').innerText;
+            const ingredients = recipe.querySelectorAll('ul li');
+            const instructions = recipe.querySelectorAll('ol li');
+            let textToRead = `Para hacer la receta de ${title} tienes que hacer lo siguiente. Primero, los ingredientes: `;
+
     </script>
 </body>
 </html>
