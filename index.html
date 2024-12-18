@@ -3,134 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de 3 Rayas</title>
+    <title>Juego de Luchas</title>
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f0f0;
+            background-color: #000;
             margin: 0;
             font-family: Arial, sans-serif;
         }
-        #game-board {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-template-rows: repeat(3, 100px);
-            gap: 5px;
+        #gameCanvas {
+            border: 2px solid #fff;
+            background-color: #1a1a1a;
         }
-        .cell {
-            width: 100px;
-            height: 100px;
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2em;
-            background-color: #fff;
-            border: 2px solid #333;
-            cursor: pointer;
+            gap: 10px;
         }
-        #message {
-            margin-top: 20px;
-            font-size: 1.5em;
+        button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div id="game-board"></div>
-    <div id="message"></div>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <div id="controls">
+        <button onclick="playerAttack()">Atacar</button>
+        <button onclick="playerDefend()">Defender</button>
+    </div>
     <script>
-        const board = document.getElementById('game-board');
-        const message = document.getElementById('message');
-        let cells;
-        let currentPlayer = 'X';
-        let gameOver = false;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-        function createBoard() {
-            board.innerHTML = '';
-            for (let i = 0; i < 9; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell');
-                cell.addEventListener('click', () => handleMove(cell, i));
-                board.appendChild(cell);
-            }
-            cells = Array.from(document.getElementsByClassName('cell'));
+        const player = { x: 100, y: 200, width: 50, height: 50, color: 'blue', hp: 100, isDefending: false };
+        const enemy = { x: 650, y: 200, width: 50, height: 50, color: 'red', hp: 100, isDefending: false };
+
+        function drawCharacter(character) {
+            ctx.fillStyle = character.color;
+            ctx.fillRect(character.x, character.y, character.width, character.height);
         }
 
-        function handleMove(cell, index) {
-            if (cell.textContent !== '' || gameOver) return;
-            cell.textContent = currentPlayer;
-            if (checkWin(currentPlayer)) {
-                message.textContent = `${currentPlayer} gana!`;
-                gameOver = true;
-                return;
-            }
-            if (cells.every(cell => cell.textContent !== '')) {
-                message.textContent = '¡Es un empate!';
-                gameOver = true;
-                return;
-            }
-            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            if (currentPlayer === 'O') {
-                machineMove();
-            }
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawCharacter(player);
+            drawCharacter(enemy);
         }
 
-        function machineMove() {
-            const emptyCells = cells.filter(cell => cell.textContent === '');
-            if (emptyCells.length === 0) return;
-
-            // Estrategia de la máquina: bloquear o ganar
-            const winningMove = findBestMove('O');
-            const blockingMove = findBestMove('X');
-            const bestMove = winningMove !== -1 ? winningMove : (blockingMove !== -1 ? blockingMove : emptyCells[Math.floor(Math.random() * emptyCells.length)]);
-            
-            cells[bestMove].textContent = 'O';
-            if (checkWin('O')) {
-                message.textContent = 'O gana!';
-                gameOver = true;
-                return;
-            }
-            if (cells.every(cell => cell.textContent !== '')) {
-                message.textContent = '¡Es un empate!';
-                gameOver = true;
-            } else {
-                currentPlayer = 'X';
-            }
-        }
-
-        function findBestMove(player) {
-            for (let i = 0; i < cells.length; i++) {
-                if (cells[i].textContent === '') {
-                    cells[i].textContent = player;
-                    if (checkWin(player)) {
-                        cells[i].textContent = '';
-                        return i;
-                    }
-                    cells[i].textContent = '';
+        function playerAttack() {
+            if (!player.isDefending) {
+                player.isDefending = false;
+                if (!enemy.isDefending) {
+                    enemy.hp -= 10;
                 }
             }
-            return -1;
+            if (enemy.hp <= 0) {
+                alert("¡Ganaste!");
+                resetGame();
+            }
+            draw();
         }
 
-        function checkWin(player) {
-            const winPatterns = [
-                [0, 1, 2],
-                [3, 4, 5],
-                [6, 7, 8],
-                [0, 3, 6],
-                [1, 4, 7],
-                [2, 5, 8],
-                [0, 4, 8],
-                [2, 4, 6],
-            ];
-            return winPatterns.some(pattern => 
-                pattern.every(index => cells[index].textContent === player)
-            );
+        function playerDefend() {
+            player.isDefending = true;
+            setTimeout(() => player.isDefending = false, 1000);
         }
 
-        createBoard();
+        function enemyMove() {
+            const action = Math.random() < 0.5 ? 'attack' : 'defend';
+            if (action === 'attack') {
+                if (!enemy.isDefending) {
+                    enemy.isDefending = false;
+                    if (!player.isDefending) {
+                        player.hp -= 10;
+                    }
+                }
+                if (player.hp <= 0) {
+                    alert("¡Perdiste!");
+                    resetGame();
+                }
+            } else {
+                enemy.isDefending = true;
+                setTimeout(() => enemy.isDefending = false, 1000);
+            }
+            draw();
+        }
+
+        function resetGame() {
+            player.hp = 100;
+            enemy.hp = 100;
+            draw();
+        }
+
+        function gameLoop() {
+            if (Math.random() < 0.02) {
+                enemyMove();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        draw();
+        gameLoop();
     </script>
 </body>
 </html>
