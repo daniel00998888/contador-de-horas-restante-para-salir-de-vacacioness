@@ -3,146 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Billar Profesional</title>
+    <title>Juego de 3 Rayas</title>
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #2d2d2d;
+            background-color: #f0f0f0;
             margin: 0;
             font-family: Arial, sans-serif;
         }
-        #gameCanvas {
-            border: 2px solid #fff;
-            background-color: #006600;
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
         }
-        #instructions {
-            color: #fff;
-            text-align: center;
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            background-color: #fff;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+        #message {
             margin-top: 20px;
+            font-size: 1.5em;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
-    <div id="instructions">
-        <p>Mueve el ratón para ajustar el taco y haz clic para golpear la bola blanca.</p>
-    </div>
+    <div id="game-board"></div>
+    <div id="message"></div>
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        const board = document.getElementById('game-board');
+        const message = document.getElementById('message');
+        let cells;
+        let currentPlayer = 'X';
+        let gameOver = false;
 
-        const BALL_RADIUS = 10;
-        const FRICTION = 0.98;
-        const CUE_LENGTH = 150;
-        let balls = [];
-        let mouseX = 0;
-        let mouseY = 0;
-
-        function createBall(x, y, color) {
-            return { x, y, color, dx: 0, dy: 0 };
+        function createBoard() {
+            board.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.addEventListener('click', () => handleMove(cell, i));
+                board.appendChild(cell);
+            }
+            cells = Array.from(document.getElementsByClassName('cell'));
         }
 
-        function init() {
-            balls = [
-                createBall(400, 200, 'white'), // bola blanca
-                createBall(450, 150, 'red'),
-                createBall(450, 200, 'yellow'),
-                createBall(450, 250, 'blue')
+        function handleMove(cell, index) {
+            if (cell.textContent !== '' || gameOver) return;
+            cell.textContent = currentPlayer;
+            if (checkWin(currentPlayer)) {
+                message.textContent = `${currentPlayer} gana!`;
+                gameOver = true;
+                return;
+            }
+            if (cells.every(cell => cell.textContent !== '')) {
+                message.textContent = '¡Es un empate!';
+                gameOver = true;
+                return;
+            }
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            if (currentPlayer === 'O') {
+                machineMove();
+            }
+        }
+
+        function machineMove() {
+            const emptyCells = cells.filter(cell => cell.textContent === '');
+            if (emptyCells.length === 0) return;
+            const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            randomCell.textContent = 'O';
+            if (checkWin('O')) {
+                message.textContent = 'O gana!';
+                gameOver = true;
+                return;
+            }
+            if (cells.every(cell => cell.textContent !== '')) {
+                message.textContent = '¡Es un empate!';
+                gameOver = true;
+            } else {
+                currentPlayer = 'X';
+            }
+        }
+
+        function checkWin(player) {
+            const winPatterns = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6],
             ];
-            draw();
-            canvas.addEventListener('mousemove', updateMousePosition);
-            canvas.addEventListener('click', hitBall);
+            return winPatterns.some(pattern => 
+                pattern.every(index => cells[index].textContent === player)
+            );
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Dibujar las bolas
-            balls.forEach(ball => {
-                ctx.beginPath();
-                ctx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
-                ctx.fillStyle = ball.color;
-                ctx.fill();
-                ctx.closePath();
-            });
-
-            // Dibujar el taco de billar
-            const cueAngle = Math.atan2(mouseY - balls[0].y, mouseX - balls[0].x);
-            const cueX = balls[0].x - Math.cos(cueAngle) * CUE_LENGTH;
-            const cueY = balls[0].y - Math.sin(cueAngle) * CUE_LENGTH;
-            ctx.beginPath();
-            ctx.moveTo(balls[0].x, balls[0].y);
-            ctx.lineTo(cueX, cueY);
-            ctx.lineWidth = 5;
-            ctx.strokeStyle = '#8B4513';
-            ctx.stroke();
-        }
-
-        function updateMousePosition(event) {
-            const rect = canvas.getBoundingClientRect();
-            mouseX = event.clientX - rect.left;
-            mouseY = event.clientY - rect.top;
-            draw();
-        }
-
-        function hitBall(event) {
-            const ball = balls[0]; // bola blanca
-            const dx = mouseX - ball.x;
-            const dy = mouseY - ball.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const speed = Math.min(distance / 10, 10); // Ajustar la fuerza del golpe
-
-            const angle = Math.atan2(dy, dx);
-            ball.dx = Math.cos(angle) * speed;
-            ball.dy = Math.sin(angle) * speed;
-
-            update();
-        }
-
-        function update() {
-            balls.forEach((ball, index) => {
-                ball.x += ball.dx;
-                ball.y += ball.dy;
-
-                ball.dx *= FRICTION;
-                ball.dy *= FRICTION;
-
-                if (ball.x + BALL_RADIUS > canvas.width || ball.x - BALL_RADIUS < 0) {
-                    ball.dx = -ball.dx;
-                }
-                if (ball.y + BALL_RADIUS > canvas.height || ball.y - BALL_RADIUS < 0) {
-                    ball.dy = -ball.dy;
-                }
-
-                for (let i = index + 1; i < balls.length; i++) {
-                    const otherBall = balls[i];
-                    const dx = otherBall.x - ball.x;
-                    const dy = otherBall.y - ball.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance < BALL_RADIUS * 2) {
-                        const angle = Math.atan2(dy, dx);
-                        const targetX = ball.x + Math.cos(angle) * BALL_RADIUS * 2;
-                        const targetY = ball.y + Math.sin(angle) * BALL_RADIUS * 2;
-                        const ax = (targetX - otherBall.x) * 0.05;
-                        const ay = (targetY - otherBall.y) * 0.05;
-
-                        ball.dx -= ax;
-                        ball.dy -= ay;
-                        otherBall.dx += ax;
-                        otherBall.dy += ay;
-                    }
-                }
-            });
-
-            draw();
-            requestAnimationFrame(update);
-        }
-
-        init();
+        createBoard();
     </script>
 </body>
 </html>
