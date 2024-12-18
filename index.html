@@ -3,110 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat con IA</title>
+    <title>Recetas Mexicanas</title>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            margin: 0;
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
         }
-        #chatContainer {
+        header {
+            background-color: #ff5722;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1em;
+        }
+        nav {
+            margin-bottom: 2em;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            width: 80%;
-            max-width: 600px;
-            height: 80vh;
-            background-color: #fff;
+            gap: 1em;
+        }
+        nav ul li {
+            background-color: #ff5722;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        #chatBox {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            border-bottom: 1px solid #ddd;
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 1em;
+            display: block;
         }
-        .message {
-            margin-bottom: 20px;
+        .recipe-list, .recipe-details {
+            display: none;
         }
-        .message.user {
-            text-align: right;
+        .recipe-details.active {
+            display: block;
         }
-        .message.bot {
-            text-align: left;
+        h2, h3 {
+            color: #333;
         }
-        #inputContainer {
-            display: flex;
-            padding: 10px;
-            border-top: 1px solid #ddd;
+        ul, ol {
+            margin: 1em 0;
+            padding-left: 2em;
         }
-        #userInput {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 20px;
-            margin-left: 10px;
-            border: none;
-            border-radius: 4px;
-            background-color: #007bff;
-            color: #fff;
-            cursor: pointer;
+        .recipe img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
-    <div id="chatContainer">
-        <div id="chatBox"></div>
-        <div id="inputContainer">
-            <input type="text" id="userInput" placeholder="Escribe tu mensaje aquí...">
-            <button onclick="sendMessage()">Enviar</button>
+    <header>
+        <h1>Recetas Mexicanas</h1>
+    </header>
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="#tacos-al-pastor" onclick="showRecipe('tacos-al-pastor')">Tacos al Pastor</a></li>
+                <li><a href="#enchiladas-verdes" onclick="showRecipe('enchiladas-verdes')">Enchiladas Verdes</a></li>
+                <li><a href="#chiles-en-nogada" onclick="showRecipe('chiles-en-nogada')">Chiles en Nogada</a></li>
+                <!-- Añadir más enlaces de recetas aquí -->
+            </ul>
+        </nav>
+        <div id="tacos-al-pastor" class="recipe-details">
+            <h2>Tacos al Pastor</h2>
+            <img src="path_to_your_image1.jpg" alt="Tacos al Pastor">
+            <h3>Ingredientes:</h3>
+            <ul>
+                <li>1 kg de carne de cerdo</li>
+                <li>2 chiles guajillo</li>
+                <li>2 chiles anchos</li>
+                <li>3 dientes de ajo</li>
+                <li>1/2 taza de vinagre de manzana</li>
+                <li>1/2 piña en rodajas</li>
+                <li>Tortillas de maíz</li>
+                <li>Cilantro y cebolla picados</li>
+            </ul>
+            <h3>Instrucciones:</h3>
+            <ol>
+                <li>Remojar los chiles en agua caliente hasta que estén suaves.</li>
+                <li>Licuar los chiles con el ajo, vinagre y un poco de agua hasta obtener una salsa homogénea.</li>
+                <li>Marinar la carne de cerdo en la salsa durante al menos 2 horas.</li>
+                <li>Asar la carne en un trompo o sartén hasta que esté bien cocida.</li>
+                <li>Calentar las tortillas y servir la carne con piña, cilantro y cebolla.</li>
+            </ol>
+        </div>
+        <div id="enchiladas-verdes" class="recipe-details">
+            <h2>Enchiladas Verdes</h2>
+            <img src="path_to_your_image2.jpg" alt="Enchiladas Verdes">
+            <h3>Ingredientes:</h3>
+            <ul>
+                <li>12 tortillas de maíz</li>
+                <li>500 g de pechuga de pollo desmenuzada</li>
+                <li>10 tomatillos</li>
+                <li>2 chiles serranos</li>
+                <li>1 diente de ajo</li>
+                <li>1/2 taza de crema</li>
+                <li>Queso fresco desmenuzado</li>
+                <li>Cilantro picado</li>
+                <li>Sal y pimienta al gusto</li>
+            </ul>
+            <h3>Instrucciones:</h3>
+            <ol>
+                <li>Cocer los tomatillos y chiles en agua hasta que estén suaves.</li>
+                <li>Licuar los tomatillos, chiles y ajo hasta obtener una salsa homogénea.</li>
+                <li>Calentar la salsa en una sartén y sazonar con sal y pimienta.</li>
+                <li>Calentar las tortillas y rellenarlas con el pollo desmenuzado.</li>
+                <li>Colocar las tortillas rellenas en un plato y bañarlas con la salsa verde.</li>
+                <li>Agregar crema, queso fresco y cilantro por encima.</li>
+            </ol>
+        </div>
+        <div id="chiles-en-nogada" class="recipe-details">
+            <h2>Chiles en Nogada</h2>
+            <img src="path_to_your_image3.jpg" alt="Chiles en Nogada">
+            <h3>Ingredientes:</h3>
+            <ul>
+                <li>6 chiles poblanos</li>
+                <li>500 g de carne molida</li>
+                <li>2 duraznos pelados y picados</li>
+                <li>1 manzana pelada y picada</li>
+                <li>1 plátano macho picado</li>
+                <li>1/2 taza de almendras picadas</li>
+                <li>1/2 taza de pasas</li>
+                <li>1 cebolla picada</li>
+                <li>2 dientes de ajo picados</li>
+                <li>1 taza de crema</li>
+                <li>1 taza de nuez de Castilla pelada y picada</li>
+                <li>Granada para decorar</li>
+                <li>Sal y pimienta al gusto</li>
+            </ul>
+            <h3>Instrucciones:</h3>
+            <ol>
+                <li>Asar y pelar los chiles poblanos. Hacer un corte a lo largo y retirar las semillas.</li>
+                <li>Sofreír la cebolla y ajo hasta que estén dorados.</li>
+                <li>Agregar la carne molida y cocinar hasta que esté bien cocida.</li>
+                <li>Agregar los duraznos, manzana, plátano, almendras y pasas. Cocinar por unos minutos.</li>
+                <li>Rellenar los chiles con la mezcla de carne.</li>
+                <li>Para la nogada, licuar la crema con las nueces hasta obtener una salsa homogénea.</li>
+                <li>Servir los chiles bañados con la nogada y decorar con granada.</li>
+            </ol>
         </div>
     </div>
     <script>
-        const chatBox = document.getElementById('chatBox');
-        const userInput = document.getElementById('userInput');
-
-        function sendMessage() {
-            const message = userInput.value.trim();
-            if (message) {
-                addMessageToChat('user', message);
-                userInput.value = '';
-                getBotResponse(message);
-            }
+        function showRecipe(recipeId) {
+            const recipes = document.querySelectorAll('.recipe-details');
+            recipes.forEach(recipe => recipe.classList.remove('active'));
+            document.getElementById(recipeId).classList.add('active');
         }
-
-        function addMessageToChat(sender, message) {
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message', sender);
-            messageElement.textContent = message;
-            chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function getBotResponse(message) {
-            const responses = {
-                "hola": "¡Hola! ¿Cómo estás?",
-                "¿cuál es tu nombre?": "Soy un asistente virtual, creado para ayudarte.",
-                "¿cómo estás?": "Estoy aquí para ayudarte.",
-                "adiós": "¡Adiós! Que tengas un buen día."
-            };
-            const response = responses[message.toLowerCase()] || "Lo siento, no entiendo tu mensaje.";
-            setTimeout(() => addMessageToChat('bot', response), 500);
-        }
-
-        userInput.addEventListener('keyup', (event) => {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        });
     </script>
 </body>
 </html>
