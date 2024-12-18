@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Buscador</title>
+    <title>Generador de Voz con Texto</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,78 +18,77 @@
         }
         .container {
             text-align: center;
+            width: 80%;
+            max-width: 600px;
         }
-        .search-box {
-            margin-top: 50px;
-        }
-        input[type="text"] {
+        textarea {
+            width: 100%;
+            height: 150px;
             padding: 10px;
-            width: 300px;
+            margin-top: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            margin-right: 10px;
+            font-size: 16px;
         }
         button {
             padding: 10px 20px;
+            margin-top: 10px;
             background-color: #4285F4;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
         }
-        .results {
-            margin-top: 20px;
-            width: 80%;
-            max-width: 600px;
-        }
-        .result-item {
-            background-color: white;
+        select {
+            margin-top: 10px;
             padding: 10px;
-            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Mini Buscador</h1>
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Ingresa tu búsqueda...">
-            <button onclick="search()">Buscar</button>
-        </div>
-        <div class="results" id="results"></div>
+        <h1>Generador de Voz con Texto</h1>
+        <textarea id="textInput" placeholder="Escribe tu texto aquí..."></textarea>
+        <select id="voiceSelect"></select>
+        <button onclick="generateVoice()">Generar Voz</button>
     </div>
     <script>
-        const resultsData = [
-            { title: "Resultado 1", description: "Descripción del resultado 1." },
-            { title: "Resultado 2", description: "Descripción del resultado 2." },
-            { title: "Resultado 3", description: "Descripción del resultado 3." },
-            { title: "Resultado 4", description: "Descripción del resultado 4." },
-            { title: "Resultado 5", description: "Descripción del resultado 5." },
-        ];
+        let voices = [];
 
-        function search() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const resultsContainer = document.getElementById('results');
-            resultsContainer.innerHTML = '';
-            
-            const filteredResults = resultsData.filter(result => 
-                result.title.toLowerCase().includes(input) || 
-                result.description.toLowerCase().includes(input)
-            );
-            
-            filteredResults.forEach(result => {
-                const resultItem = document.createElement('div');
-                resultItem.classList.add('result-item');
-                resultItem.innerHTML = `<h2>${result.title}</h2><p>${result.description}</p>`;
-                resultsContainer.appendChild(resultItem);
+        function populateVoiceList() {
+            voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('es'));
+            const voiceSelect = document.getElementById('voiceSelect');
+            voiceSelect.innerHTML = '';
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
             });
+        }
 
-            if (filteredResults.length === 0) {
-                resultsContainer.innerHTML = '<p>No se encontraron resultados.</p>';
+        function generateVoice() {
+            const textInput = document.getElementById('textInput').value;
+            const voiceSelect = document.getElementById('voiceSelect');
+            const selectedVoiceIndex = voiceSelect.value;
+            const selectedVoice = voices[selectedVoiceIndex];
+
+            if (textInput !== '') {
+                const utterance = new SpeechSynthesisUtterance(textInput);
+                utterance.voice = selectedVoice;
+                speechSynthesis.speak(utterance);
+            } else {
+                alert('Por favor, escribe un texto antes de generar la voz.');
             }
         }
+
+        window.speechSynthesis.onvoiceschanged = populateVoiceList;
+        populateVoiceList();
     </script>
 </body>
 </html>
