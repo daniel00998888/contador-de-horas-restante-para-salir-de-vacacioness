@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Fuerza</title>
+    <title>Reflexión Espiritual</title>
     <style>
         body {
             display: flex;
@@ -14,108 +14,56 @@
             background-color: #f0f0f0;
             margin: 0;
             font-family: Arial, sans-serif;
+            text-align: center;
         }
-        #gameContainer {
-            display: flex;
-            justify-content: space-around;
-            width: 80%;
+        h1 {
+            color: #333;
         }
-        .barContainer {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .content {
+            margin: 20px;
         }
-        .bar {
-            width: 30px;
-            height: 200px;
-            background-color: #ddd;
-            border: 2px solid #333;
-            position: relative;
+        #quote {
+            font-size: 1.2em;
+            color: #666;
         }
-        .progress {
-            width: 100%;
-            height: 0;
-            background-color: #76c7c0;
-            position: absolute;
-            bottom: 0;
+        #prayer {
+            font-size: 1em;
+            color: #555;
+            margin-top: 20px;
         }
         button {
             margin-top: 20px;
-            padding: 10px;
-            font-size: 16px;
+            padding: 10px 20px;
+            font-size: 1em;
             cursor: pointer;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
         }
-        #message {
+        img {
             margin-top: 20px;
-            font-size: 1.5em;
-            color: #333;
+            display: none;
+            width: 300px;
+            height: auto;
         }
     </style>
 </head>
 <body>
-    <div id="gameContainer">
-        <div class="barContainer">
-            <div class="bar" id="playerBar">
-                <div class="progress" id="playerProgress"></div>
-            </div>
-            <button onclick="playerClick()">Click!</button>
+    <h1>Reflexión Espiritual</h1>
+    <div class="content">
+        <div id="quote">"Ama a tu prójimo como a ti mismo." - Mateo 22:39</div>
+        <div id="prayer">
+            <p>Oración del día:</p>
+            <p>Señor, concédenos la gracia de ser siempre justos en nuestras acciones y compasivos en nuestros corazones. Amén.</p>
         </div>
-        <div class="barContainer">
-            <div class="bar" id="machineBar">
-                <div class="progress" id="machineProgress"></div>
-            </div>
-            <button onclick="startGame()">Start Game</button>
-        </div>
+        <button onclick="showImage()">Ver Imagen</button>
+        <img id="religiousImage" src="path_to_your_image.jpg" alt="Imagen Religiosa">
     </div>
-    <div id="message"></div>
     <script>
-        let playerProgress = 0;
-        let machineProgress = 0;
-        let gameActive = false;
-
-        function playerClick() {
-            if (!gameActive) return;
-            playerProgress += 5;
-            updateProgress('playerProgress', playerProgress);
-            checkWin();
-        }
-
-        function machineMove() {
-            machineProgress += Math.random() * 5;
-            updateProgress('machineProgress', machineProgress);
-            checkWin();
-        }
-
-        function updateProgress(barId, progress) {
-            const progressBar = document.getElementById(barId);
-            progressBar.style.height = progress + 'px';
-        }
-
-        function checkWin() {
-            if (playerProgress >= 200) {
-                gameActive = false;
-                document.getElementById('message').textContent = '¡Tú ganas!';
-            } else if (machineProgress >= 200) {
-                gameActive = false;
-                document.getElementById('message').textContent = '¡La máquina gana!';
-            }
-        }
-
-        function startGame() {
-            playerProgress = 0;
-            machineProgress = 0;
-            gameActive = true;
-            updateProgress('playerProgress', 0);
-            updateProgress('machineProgress', 0);
-            document.getElementById('message').textContent = '';
-
-            const machineInterval = setInterval(() => {
-                if (!gameActive) {
-                    clearInterval(machineInterval);
-                } else {
-                    machineMove();
-                }
-            }, 100);
+        function showImage() {
+            const img = document.getElementById('religiousImage');
+            img.style.display = img.style.display === 'none' ? 'block' : 'none';
         }
     </script>
 </body>
