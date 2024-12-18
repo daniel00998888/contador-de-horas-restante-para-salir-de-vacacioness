@@ -3,114 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Luchas</title>
+    <title>Juego de Fuerza</title>
     <style>
         body {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #000;
+            background-color: #f0f0f0;
             margin: 0;
             font-family: Arial, sans-serif;
         }
-        #gameCanvas {
-            border: 2px solid #fff;
-            background-color: #1a1a1a;
-        }
-        #controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+        #gameContainer {
             display: flex;
-            gap: 10px;
+            justify-content: space-around;
+            width: 80%;
+        }
+        .barContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .bar {
+            width: 30px;
+            height: 200px;
+            background-color: #ddd;
+            border: 2px solid #333;
+            position: relative;
+        }
+        .progress {
+            width: 100%;
+            height: 0;
+            background-color: #76c7c0;
+            position: absolute;
+            bottom: 0;
         }
         button {
+            margin-top: 20px;
             padding: 10px;
             font-size: 16px;
             cursor: pointer;
         }
+        #message {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #333;
+        }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
-    <div id="controls">
-        <button onclick="playerAttack()">Atacar</button>
-        <button onclick="playerDefend()">Defender</button>
+    <div id="gameContainer">
+        <div class="barContainer">
+            <div class="bar" id="playerBar">
+                <div class="progress" id="playerProgress"></div>
+            </div>
+            <button onclick="playerClick()">Click!</button>
+        </div>
+        <div class="barContainer">
+            <div class="bar" id="machineBar">
+                <div class="progress" id="machineProgress"></div>
+            </div>
+            <button onclick="startGame()">Start Game</button>
+        </div>
     </div>
+    <div id="message"></div>
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        let playerProgress = 0;
+        let machineProgress = 0;
+        let gameActive = false;
 
-        const player = { x: 100, y: 200, width: 50, height: 50, color: 'blue', hp: 100, isDefending: false };
-        const enemy = { x: 650, y: 200, width: 50, height: 50, color: 'red', hp: 100, isDefending: false };
-
-        function drawCharacter(character) {
-            ctx.fillStyle = character.color;
-            ctx.fillRect(character.x, character.y, character.width, character.height);
+        function playerClick() {
+            if (!gameActive) return;
+            playerProgress += 5;
+            updateProgress('playerProgress', playerProgress);
+            checkWin();
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawCharacter(player);
-            drawCharacter(enemy);
+        function machineMove() {
+            machineProgress += Math.random() * 5;
+            updateProgress('machineProgress', machineProgress);
+            checkWin();
         }
 
-        function playerAttack() {
-            if (!player.isDefending) {
-                player.isDefending = false;
-                if (!enemy.isDefending) {
-                    enemy.hp -= 10;
+        function updateProgress(barId, progress) {
+            const progressBar = document.getElementById(barId);
+            progressBar.style.height = progress + 'px';
+        }
+
+        function checkWin() {
+            if (playerProgress >= 200) {
+                gameActive = false;
+                document.getElementById('message').textContent = '¡Tú ganas!';
+            } else if (machineProgress >= 200) {
+                gameActive = false;
+                document.getElementById('message').textContent = '¡La máquina gana!';
+            }
+        }
+
+        function startGame() {
+            playerProgress = 0;
+            machineProgress = 0;
+            gameActive = true;
+            updateProgress('playerProgress', 0);
+            updateProgress('machineProgress', 0);
+            document.getElementById('message').textContent = '';
+
+            const machineInterval = setInterval(() => {
+                if (!gameActive) {
+                    clearInterval(machineInterval);
+                } else {
+                    machineMove();
                 }
-            }
-            if (enemy.hp <= 0) {
-                alert("¡Ganaste!");
-                resetGame();
-            }
-            draw();
+            }, 100);
         }
-
-        function playerDefend() {
-            player.isDefending = true;
-            setTimeout(() => player.isDefending = false, 1000);
-        }
-
-        function enemyMove() {
-            const action = Math.random() < 0.5 ? 'attack' : 'defend';
-            if (action === 'attack') {
-                if (!enemy.isDefending) {
-                    enemy.isDefending = false;
-                    if (!player.isDefending) {
-                        player.hp -= 10;
-                    }
-                }
-                if (player.hp <= 0) {
-                    alert("¡Perdiste!");
-                    resetGame();
-                }
-            } else {
-                enemy.isDefending = true;
-                setTimeout(() => enemy.isDefending = false, 1000);
-            }
-            draw();
-        }
-
-        function resetGame() {
-            player.hp = 100;
-            enemy.hp = 100;
-            draw();
-        }
-
-        function gameLoop() {
-            if (Math.random() < 0.02) {
-                enemyMove();
-            }
-            requestAnimationFrame(gameLoop);
-        }
-
-        draw();
-        gameLoop();
     </script>
 </body>
 </html>
