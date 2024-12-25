@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página Web Interactiva</title>
+    <title>Santa Claus Tracker</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,136 +12,98 @@
             background-color: #f4f4f4;
         }
         header {
-            background-color: #4CAF50;
+            background-color: #ff5722;
             color: white;
             text-align: center;
             padding: 1em;
         }
-        nav {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 1em;
-        }
-        nav a {
-            color: white;
-            margin: 0 15px;
-            text-decoration: none;
-        }
-        main {
-            padding: 2em;
-        }
-        .section {
-            margin-bottom: 2em;
-        }
-        form {
-            background-color: #fff;
-            padding: 1em;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        input, textarea {
+        #map {
+            height: 80vh;
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
         }
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        #info {
+            text-align: center;
+            margin-top: 1em;
         }
-        .gallery img {
-            width: 100px;
-            height: 100px;
-            margin: 5px;
+        #info h2 {
+            font-size: 1.5em;
+            margin: 0;
         }
-        .comments {
-            background-color: #fff;
-            padding: 1em;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .comment {
-            margin-bottom: 1em;
+        #info p {
+            margin: 0.5em 0;
         }
     </style>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2125166334282472"
-     crossorigin="anonymous"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
 </head>
 <body>
     <header>
-        <h1>Página Web Interactiva</h1>
+        <h1>Santa Claus Tracker</h1>
     </header>
-    <nav>
-        <a href="#contact">Contacto</a>
-        <a href="#blog">Blog</a>
-        <a href="#gallery">Galería</a>
-        <a href="#comments">Comentarios</a>
-    </nav>
-    <main>
-        <section id="contact" class="section">
-            <h2>Contacto</h2>
-            <form onsubmit="submitContact(event)">
-                <input type="text" id="name" placeholder="Nombre" required>
-                <input type="email" id="email" placeholder="Email" required>
-                <textarea id="message" placeholder="Mensaje" required></textarea>
-                <button type="submit">Enviar</button>
-            </form>
-        </section>
-        <section id="blog" class="section">
-            <h2>Blog</h2>
-            <article>
-                <h3>Artículo 1</h3>
-                <p>Contenido del artículo 1...</p>
-            </article>
-            <article>
-                <h3>Artículo 2</h3>
-                <p>Contenido del artículo 2...</p>
-            </article>
-        </section>
-        <section id="gallery" class="section gallery">
-            <h2>Galería de Imágenes</h2>
-            <img src="path_to_image1.jpg" alt="Imagen 1">
-            <img src="path_to_image2.jpg" alt="Imagen 2">
-            <img src="path_to_image3.jpg" alt="Imagen 3">
-            <!-- Añadir más imágenes aquí -->
-        </section>
-        <section id="comments" class="section comments">
-            <h2>Comentarios</h2>
-            <form onsubmit="submitComment(event)">
-                <input type="text" id="commentName" placeholder="Nombre" required>
-                <textarea id="commentMessage" placeholder="Comentario" required></textarea>
-                <button type="submit">Enviar Comentario</button>
-            </form>
-            <div id="commentList"></div>
-        </section>
-    </main>
+    <div id="map"></div>
+    <div id="info">
+        <h2>País Actual: <span id="country">Desconocido</span></h2>
+        <p>Santa llegará a México en <span id="countdown">calculando...</span></p>
+    </div>
     <script>
-        function submitContact(event) {
-            event.preventDefault();
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const message = document.getElementById('message').value;
-            alert(`Gracias, ${name}. Hemos recibido tu mensaje.`);
+        // Array de países y sus coordenadas aproximadas
+        const countries = [
+            { name: "Australia", lat: -25.2744, lng: 133.7751 },
+            { name: "Japón", lat: 36.2048, lng: 138.2529 },
+            { name: "China", lat: 35.8617, lng: 104.1954 },
+            { name: "Rusia", lat: 61.5240, lng: 105.3188 },
+            { name: "India", lat: 20.5937, lng: 78.9629 },
+            { name: "Francia", lat: 46.6034, lng: 1.8883 },
+            { name: "España", lat: 40.4637, lng: -3.7492 },
+            { name: "Reino Unido", lat: 55.3781, lng: -3.4360 },
+            { name: "Estados Unidos", lat: 37.0902, lng: -95.7129 },
+            { name: "México", lat: 23.6345, lng: -102.5528 }
+        ];
+
+        let map;
+        let marker;
+        let currentCountryIndex = 0;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 0, lng: 0 },
+                zoom: 2
+            });
+
+            marker = new google.maps.Marker({
+                map: map,
+                icon: 'santa.png'
+            });
+
+            updateSantaLocation();
         }
 
-        function submitComment(event) {
-            event.preventDefault();
-            const name = document.getElementById('commentName').value;
-            const message = document.getElementById('commentMessage').value;
-            const commentList = document.getElementById('commentList');
-            const comment = document.createElement('div');
-            comment.classList.add('comment');
-            comment.innerHTML = `<strong>${name}</strong><p>${message}</p>`;
-            commentList.appendChild(comment);
-            document.getElementById('commentName').value = '';
-            document.getElementById('commentMessage').value = '';
+        function updateSantaLocation() {
+            const country = countries[currentCountryIndex];
+            const position = { lat: country.lat, lng: country.lng };
+            marker.setPosition(position);
+            map.setCenter(position);
+
+            document.getElementById('country').textContent = country.name;
+
+            // Calcular el tiempo restante para México
+            const mexicoTime = new Date();
+            mexicoTime.setHours(24, 0, 0, 0);
+            const now = new Date();
+            const timeDiff = mexicoTime - now;
+
+            if (timeDiff > 0) {
+                const hours = Math.floor((timeDiff % 86400000) / 3600000);
+                const minutes = Math.floor((timeDiff % 3600000) / 60000);
+                document.getElementById('countdown').textContent = `${hours} horas y ${minutes} minutos`;
+            } else {
+                document.getElementById('countdown').textContent = "¡Santa ya ha llegado a México!";
+            }
+
+            currentCountryIndex = (currentCountryIndex + 1) % countries.length;
+            setTimeout(updateSantaLocation, 5000); // Actualizar cada 5 segundos
         }
+
+        window.onload = initMap;
     </script>
 </body>
 </html>
