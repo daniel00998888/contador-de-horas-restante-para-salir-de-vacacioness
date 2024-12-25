@@ -45,7 +45,6 @@
         <p>Santa llegará a México en <span id="countdown">calculando...</span></p>
     </div>
     <script>
-        // Array de países, sus coordenadas y diferencias horarias en horas respecto a UTC
         const countries = [
             { name: "Australia", lat: -25.2744, lng: 133.7751, offset: 10 },
             { name: "Japón", lat: 36.2048, lng: 138.2529, offset: 9 },
@@ -90,13 +89,18 @@
                 document.getElementById('country').textContent = currentCountry.name;
 
                 // Calcular el tiempo restante para México
-                const mexicoTime = new Date();
-                mexicoTime.setUTCHours((24 + countries.find(c => c.name === 'México').offset) % 24, 0, 0, 0);
+                const mexicoOffset = countries.find(c => c.name === 'México').offset;
+                const mexicoTime = new Date(now);
+                mexicoTime.setUTCHours(24 + mexicoOffset);
+                mexicoTime.setMinutes(0);
+                mexicoTime.setSeconds(0);
+                mexicoTime.setMilliseconds(0);
+
                 const timeDiff = mexicoTime - now;
 
                 if (timeDiff > 0) {
-                    const hours = Math.floor((timeDiff % 86400000) / 3600000);
-                    const minutes = Math.floor((timeDiff % 3600000) / 60000);
+                    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
                     document.getElementById('countdown').textContent = `${hours} horas y ${minutes} minutos`;
                 } else {
                     document.getElementById('countdown').textContent = "¡Santa ya ha llegado a México!";
