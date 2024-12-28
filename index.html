@@ -49,12 +49,12 @@
         ];
 
         const pockets = [
-            { x: 0, y: 0 },
-            { x: table.width / 2, y: 0 },
-            { x: table.width, y: 0 },
-            { x: 0, y: table.height },
-            { x: table.width / 2, y: table.height },
-            { x: table.width, y: table.height }
+            { x: 30, y: 30 },
+            { x: table.width / 2, y: 30 },
+            { x: table.width - 30, y: 30 },
+            { x: 30, y: table.height - 30 },
+            { x: table.width / 2, y: table.height - 30 },
+            { x: table.width - 30, y: table.height - 30 }
         ];
 
         let dragging = false;
@@ -74,9 +74,12 @@
         }
 
         function drawPocket(pocket) {
+            const gradient = ctx.createRadialGradient(pocket.x, pocket.y, pocketRadius / 2, pocket.x, pocket.y, pocketRadius);
+            gradient.addColorStop(0, '#000000');
+            gradient.addColorStop(1, '#555555');
             ctx.beginPath();
             ctx.arc(pocket.x, pocket.y, pocketRadius, 0, Math.PI * 2);
-            ctx.fillStyle = '#000000';
+            ctx.fillStyle = gradient;
             ctx.fill();
             ctx.closePath();
         }
