@@ -3,183 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Billar</title>
+    <title>Minecraft 3D Básico</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
-            background-color: #006400;
-            text-align: center;
+            overflow: hidden;
         }
         canvas {
-            border: 1px solid black;
-            background-color: #0b6623;
             display: block;
-            margin: 0 auto;
-            position: relative;
-        }
-        #instructions {
-            color: white;
-            margin-top: 1em;
         }
     </style>
 </head>
 <body>
-    <h1>Juego de Billar</h1>
-    <canvas id="billiardsCanvas" width="800" height="400"></canvas>
-    <p id="instructions">Haz clic y arrastra para golpear la bola blanca.</p>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        const canvas = document.getElementById('billiardsCanvas');
-        const ctx = canvas.getContext('2d');
+        // Configuración básica de Three.js
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-        const table = {
-            width: canvas.width,
-            height: canvas.height
-        };
+        // Crear una luz
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 10, 7.5);
+        scene.add(light);
 
-        const ballRadius = 10;
-        const pocketRadius = 15;
-
-        const balls = [
-            { x: table.width / 2, y: table.height / 2, dx: 0, dy: 0, color: '#FFFFFF' },
-            { x: table.width / 2 + 30, y: table.height / 2 - 30, dx: 0, dy: 0, color: '#FF0000' },
-            { x: table.width / 2 + 30, y: table.height / 2 + 30, dx: 0, dy: 0, color: '#0000FF' },
-            // Añadir más bolas aquí
-        ];
-
-        const pockets = [
-            { x: 30, y: 30 },
-            { x: table.width / 2, y: 30 },
-            { x: table.width - 30, y: 30 },
-            { x: 30, y: table.height - 30 },
-            { x: table.width / 2, y: table.height - 30 },
-            { x: table.width - 30, y: table.height - 30 }
-        ];
-
-        let dragging = false;
-        let dragStart = null;
-
-        canvas.addEventListener('mousedown', startDrag);
-        canvas.addEventListener('mousemove', drag);
-        canvas.addEventListener('mouseup', endDrag);
-
-        function drawBall(ball) {
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
-            ctx.fillStyle = ball.color;
-            ctx.fill();
-            ctx.stroke();
-            ctx.closePath();
+        // Crear un bloque de "césped"
+        function createBlock(x, y, z) {
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
+            const block = new THREE.Mesh(geometry, material);
+            block.position.set(x, y, z);
+            scene.add(block);
         }
 
-        function drawPocket(pocket) {
-            const gradient = ctx.createRadialGradient(pocket.x, pocket.y, pocketRadius / 2, pocket.x, pocket.y, pocketRadius);
-            gradient.addColorStop(0, '#000000');
-            gradient.addColorStop(1, '#555555');
-            ctx.beginPath();
-            ctx.arc(pocket.x, pocket.y, pocketRadius, 0, Math.PI * 2);
-            ctx.fillStyle = gradient;
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (const pocket of pockets) {
-                drawPocket(pocket);
-            }
-            for (const ball of balls) {
-                drawBall(ball);
+        // Añadir bloques al "terreno"
+        for (let x = -5; x <= 5; x++) {
+            for (let z = -5; z <= 5; z++) {
+                createBlock(x, 0, z);
             }
         }
 
-        function update() {
-            for (const ball of balls) {
-                ball.x += ball.dx;
-                ball.y += ball.dy;
+        // Posición de la cámara
+        camera.position.z = 10;
+        camera.position.y = 5;
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-                if (ball.x + ball.dx > canvas.width - ballRadius || ball.x + ball.dx < ballRadius) {
-                    ball.dx = -ball.dx;
-                }
-                if (ball.y + ball.dy > canvas.height - ballRadius || ball.y + ball.dy < ballRadius) {
-                    ball.dy = -ball.dy;
-                }
-
-                // Fricción
-                ball.dx *= 0.99;
-                ball.dy *= 0.99;
-
-                // Chequeo de colisión con otras bolas
-                for (const otherBall of balls) {
-                    if (ball !== otherBall) {
-                        const dist = Math.hypot(otherBall.x - ball.x, otherBall.y - ball.y);
-                        if (dist < ballRadius * 2) {
-                            // Resolver colisión simple
-                            const angle = Math.atan2(otherBall.y - ball.y, otherBall.x - ball.x);
-                            const totalVelocity = Math.hypot(ball.dx, ball.dy) + Math.hypot(otherBall.dx, otherBall.dy);
-
-                            ball.dx = Math.cos(angle) * totalVelocity;
-                            ball.dy = Math.sin(angle) * totalVelocity;
-                            otherBall.dx = -Math.cos(angle) * totalVelocity;
-                            otherBall.dy = -Math.sin(angle) * totalVelocity;
-                        }
-                    }
-                }
-
-                // Chequeo de colisión con agujeros
-                for (const pocket of pockets) {
-                    const dist = Math.hypot(pocket.x - ball.x, pocket.y - ball.y);
-                    if (dist < pocketRadius) {
-                        ball.x = -100; // Mueve la bola fuera del canvas
-                        ball.dx = 0;
-                        ball.dy = 0;
-                    }
-                }
-            }
+        // Animación
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
         }
 
-        function startDrag(event) {
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            if (Math.hypot(balls[0].x - x, balls[0].y - y) < ballRadius) {
-                dragging = true;
-                dragStart = { x, y };
-            }
-        }
+        animate();
 
-        function drag(event) {
-            if (dragging) {
-                const rect = canvas.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-                const dx = x - dragStart.x;
-                const dy = y - dragStart.y;
-                balls[0].x += dx;
-                balls[0].y += dy;
-                dragStart = { x, y };
-            }
-        }
-
-        function endDrag(event) {
-            if (dragging) {
-                dragging = false;
-                const rect = canvas.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-                balls[0].dx = (balls[0].x - x) * 0.1;
-                balls[0].dy = (balls[0].y - y) * 0.1;
-            }
-        }
-
-        function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
-        loop();
+        // Ajustar el tamaño al cambiar la ventana
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
     </script>
 </body>
 </html>
