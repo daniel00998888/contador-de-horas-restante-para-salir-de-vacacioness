@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Billar Básico</title>
+    <title>Juego de Billar</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,6 +17,7 @@
             background-color: #0b6623;
             display: block;
             margin: 0 auto;
+            position: relative;
         }
         #instructions {
             color: white;
@@ -25,7 +26,7 @@
     </style>
 </head>
 <body>
-    <h1>Juego de Billar Básico</h1>
+    <h1>Juego de Billar</h1>
     <canvas id="billiardsCanvas" width="800" height="400"></canvas>
     <p id="instructions">Haz clic y arrastra para golpear la bola blanca.</p>
     <script>
@@ -40,6 +41,8 @@
         const ballRadius = 10;
         const balls = [
             { x: table.width / 2, y: table.height / 2, dx: 0, dy: 0, color: '#FFFFFF' },
+            { x: table.width / 2 + 30, y: table.height / 2 - 30, dx: 0, dy: 0, color: '#FF0000' },
+            { x: table.width / 2 + 30, y: table.height / 2 + 30, dx: 0, dy: 0, color: '#0000FF' },
             // Añadir más bolas aquí
         ];
 
