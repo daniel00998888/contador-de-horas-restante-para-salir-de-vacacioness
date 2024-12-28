@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página de Juegos</title>
+    <title>Página de Pago</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,6 +11,10 @@
             padding: 0;
             background-color: #f4f4f4;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh;
         }
         header {
             background-color: #333;
@@ -20,73 +24,34 @@
         .container {
             margin-top: 2em;
         }
-        .game {
-            margin: 1em 0;
-            padding: 1em;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background-color: white;
-        }
-        .pay-button {
-            padding: 10px 20px;
-            background-color: #0070ba;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 1em;
-        }
-        .hidden {
-            display: none;
-        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Página de Juegos</h1>
+        <h1>Paga para Acceder</h1>
     </header>
     <div class="container">
-        <div class="game" id="game1">
-            <h2>Juego 1</h2>
-            <p>Para jugar, paga 10 pesos.</p>
-            <button class="pay-button" onclick="showPayPalButton('paypal-button-container1')">Jugar</button>
-            <div id="paypal-button-container1" class="hidden"></div>
-        </div>
-        <div class="game" id="game2">
-            <h2>Juego 2</h2>
-            <p>Para jugar, paga 10 pesos.</p>
-            <button class="pay-button" onclick="showPayPalButton('paypal-button-container2')">Jugar</button>
-            <div id="paypal-button-container2" class="hidden"></div>
-        </div>
-        <!-- Añadir más juegos aquí -->
+        <div id="paypal-button-container"></div>
     </div>
     <script src="https://www.paypal.com/sdk/js?client-id=BQKL8DZ3375SY&currency=MXN"></script>
     <script>
-        const createPayPalButton = (containerId) => {
-            paypal.Buttons({
-                createOrder: function(data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: {
-                                value: '10.00'
-                            }
-                        }]
-                    });
-                },
-                onApprove: function(data, actions) {
-                    return actions.order.capture().then(function(details) {
-                        alert('Pago completado por ' + details.payer.name.given_name);
-                        document.getElementById(containerId).innerHTML = '<p>Pago recibido. ¡Ahora puedes jugar!</p>';
-                    });
-                }
-            }).render(`#${containerId}`);
-        };
-
-        const showPayPalButton = (containerId) => {
-            const container = document.getElementById(containerId);
-            container.classList.remove('hidden');
-            createPayPalButton(containerId);
-        };
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '10.00'
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    alert('Pago completado por ' + details.payer.name.given_name);
+                    window.location.href = 'main.html'; // Redirigir a la página principal después del pago
+                });
+            }
+        }).render('#paypal-button-container');
     </script>
 </body>
 </html>
