@@ -39,11 +39,22 @@
         };
 
         const ballRadius = 10;
+        const pocketRadius = 15;
+
         const balls = [
             { x: table.width / 2, y: table.height / 2, dx: 0, dy: 0, color: '#FFFFFF' },
             { x: table.width / 2 + 30, y: table.height / 2 - 30, dx: 0, dy: 0, color: '#FF0000' },
             { x: table.width / 2 + 30, y: table.height / 2 + 30, dx: 0, dy: 0, color: '#0000FF' },
             // Añadir más bolas aquí
+        ];
+
+        const pockets = [
+            { x: 0, y: 0 },
+            { x: table.width / 2, y: 0 },
+            { x: table.width, y: 0 },
+            { x: 0, y: table.height },
+            { x: table.width / 2, y: table.height },
+            { x: table.width, y: table.height }
         ];
 
         let dragging = false;
@@ -62,8 +73,19 @@
             ctx.closePath();
         }
 
+        function drawPocket(pocket) {
+            ctx.beginPath();
+            ctx.arc(pocket.x, pocket.y, pocketRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#000000';
+            ctx.fill();
+            ctx.closePath();
+        }
+
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (const pocket of pockets) {
+                drawPocket(pocket);
+            }
             for (const ball of balls) {
                 drawBall(ball);
             }
@@ -84,6 +106,33 @@
                 // Fricción
                 ball.dx *= 0.99;
                 ball.dy *= 0.99;
+
+                // Chequeo de colisión con otras bolas
+                for (const otherBall of balls) {
+                    if (ball !== otherBall) {
+                        const dist = Math.hypot(otherBall.x - ball.x, otherBall.y - ball.y);
+                        if (dist < ballRadius * 2) {
+                            // Resolver colisión simple
+                            const angle = Math.atan2(otherBall.y - ball.y, otherBall.x - ball.x);
+                            const totalVelocity = Math.hypot(ball.dx, ball.dy) + Math.hypot(otherBall.dx, otherBall.dy);
+
+                            ball.dx = Math.cos(angle) * totalVelocity;
+                            ball.dy = Math.sin(angle) * totalVelocity;
+                            otherBall.dx = -Math.cos(angle) * totalVelocity;
+                            otherBall.dy = -Math.sin(angle) * totalVelocity;
+                        }
+                    }
+                }
+
+                // Chequeo de colisión con agujeros
+                for (const pocket of pockets) {
+                    const dist = Math.hypot(pocket.x - ball.x, pocket.y - ball.y);
+                    if (dist < pocketRadius) {
+                        ball.x = -100; // Mueve la bola fuera del canvas
+                        ball.dx = 0;
+                        ball.dy = 0;
+                    }
+                }
             }
         }
 
