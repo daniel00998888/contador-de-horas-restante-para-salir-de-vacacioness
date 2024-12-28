@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Billar</title>
+    <title>Juego de Billar Básico</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,35 +25,35 @@
     </style>
 </head>
 <body>
-    <h1>Juego de Billar</h1>
+    <h1>Juego de Billar Básico</h1>
     <canvas id="billiardsCanvas" width="800" height="400"></canvas>
-    <p id="instructions">Arrastra y suelta las bolas para jugar.</p>
+    <p id="instructions">Haz clic y arrastra para golpear la bola blanca.</p>
     <script>
         const canvas = document.getElementById('billiardsCanvas');
         const ctx = canvas.getContext('2d');
-        const balls = [];
-        const ballRadius = 10;
 
-        // Inicializar bolas
-        for (let i = 0; i < 15; i++) {
-            balls.push({
-                x: Math.random() * (canvas.width - 2 * ballRadius) + ballRadius,
-                y: Math.random() * (canvas.height - 2 * ballRadius) + ballRadius,
-                dx: Math.random() * 2 - 1,
-                dy: Math.random() * 2 - 1,
-                dragging: false
-            });
-        }
+        const table = {
+            width: canvas.width,
+            height: canvas.height
+        };
+
+        const ballRadius = 10;
+        const balls = [
+            { x: table.width / 2, y: table.height / 2, dx: 0, dy: 0, color: '#FFFFFF' },
+            // Añadir más bolas aquí
+        ];
+
+        let dragging = false;
+        let dragStart = null;
 
         canvas.addEventListener('mousedown', startDrag);
         canvas.addEventListener('mousemove', drag);
         canvas.addEventListener('mouseup', endDrag);
-        canvas.addEventListener('mouseleave', endDrag);
 
         function drawBall(ball) {
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
-            ctx.fillStyle = '#FFD700';
+            ctx.fillStyle = ball.color;
             ctx.fill();
             ctx.stroke();
             ctx.closePath();
@@ -68,16 +68,19 @@
 
         function update() {
             for (const ball of balls) {
-                if (!ball.dragging) {
-                    ball.x += ball.dx;
-                    ball.y += ball.dy;
-                    if (ball.x + ball.dx > canvas.width - ballRadius || ball.x + ball.dx < ballRadius) {
-                        ball.dx = -ball.dx;
-                    }
-                    if (ball.y + ball.dy > canvas.height - ballRadius || ball.y + ball.dy < ballRadius) {
-                        ball.dy = -ball.dy;
-                    }
+                ball.x += ball.dx;
+                ball.y += ball.dy;
+
+                if (ball.x + ball.dx > canvas.width - ballRadius || ball.x + ball.dx < ballRadius) {
+                    ball.dx = -ball.dx;
                 }
+                if (ball.y + ball.dy > canvas.height - ballRadius || ball.y + ball.dy < ballRadius) {
+                    ball.dy = -ball.dy;
+                }
+
+                // Fricción
+                ball.dx *= 0.99;
+                ball.dy *= 0.99;
             }
         }
 
@@ -85,31 +88,33 @@
             const rect = canvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
-            for (const ball of balls) {
-                const dist = Math.sqrt((x - ball.x) ** 2 + (y - ball.y) ** 2);
-                if (dist < ballRadius) {
-                    ball.dragging = true;
-                    ball.dx = 0;
-                    ball.dy = 0;
-                }
+            if (Math.hypot(balls[0].x - x, balls[0].y - y) < ballRadius) {
+                dragging = true;
+                dragStart = { x, y };
             }
         }
 
         function drag(event) {
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            for (const ball of balls) {
-                if (ball.dragging) {
-                    ball.x = x;
-                    ball.y = y;
-                }
+            if (dragging) {
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                const dx = x - dragStart.x;
+                const dy = y - dragStart.y;
+                balls[0].x += dx;
+                balls[0].y += dy;
+                dragStart = { x, y };
             }
         }
 
-        function endDrag() {
-            for (const ball of balls) {
-                ball.dragging = false;
+        function endDrag(event) {
+            if (dragging) {
+                dragging = false;
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                balls[0].dx = (balls[0].x - x) * 0.1;
+                balls[0].dy = (balls[0].y - y) * 0.1;
             }
         }
 
