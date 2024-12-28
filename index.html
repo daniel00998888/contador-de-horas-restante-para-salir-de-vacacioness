@@ -3,114 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Santa Claus Tracker</title>
+    <title>Página de Juegos</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
+            text-align: center;
         }
         header {
-            background-color: #ff5722;
+            background-color: #333;
             color: white;
-            text-align: center;
             padding: 1em;
         }
-        #map {
-            height: 80vh;
-            width: 100%;
+        .container {
+            margin-top: 2em;
         }
-        #info {
-            text-align: center;
+        .game {
+            margin: 1em 0;
+            padding: 1em;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: white;
+        }
+        .pay-button {
+            padding: 10px 20px;
+            background-color: #0070ba;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
             margin-top: 1em;
         }
-        #info h2 {
-            font-size: 1.5em;
-            margin: 0;
-        }
-        #info p {
-            margin: 0.5em 0;
-        }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
 </head>
 <body>
     <header>
-        <h1>Santa Claus Tracker</h1>
+        <h1>Página de Juegos</h1>
     </header>
-    <div id="map"></div>
-    <div id="info">
-        <h2>País Actual: <span id="country">Desconocido</span></h2>
-        <p>Santa llegará a México en <span id="countdown">calculando...</span></p>
+    <div class="container">
+        <div class="game" id="game1">
+            <h2>Juego 1</h2>
+            <p>Para jugar, paga 10 pesos.</p>
+            <div id="paypal-button-container1"></div>
+        </div>
+        <div class="game" id="game2">
+            <h2>Juego 2</h2>
+            <p>Para jugar, paga 10 pesos.</p>
+            <div id="paypal-button-container2"></div>
+        </div>
+        <!-- Añadir más juegos aquí -->
     </div>
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=MXN"></script>
     <script>
-        const countries = [
-            { name: "Australia", lat: -25.2744, lng: 133.7751, offset: 10 },
-            { name: "Japón", lat: 36.2048, lng: 138.2529, offset: 9 },
-            { name: "China", lat: 35.8617, lng: 104.1954, offset: 8 },
-            { name: "Rusia", lat: 61.5240, lng: 105.3188, offset: 3 },
-            { name: "India", lat: 20.5937, lng: 78.9629, offset: 5.5 },
-            { name: "Francia", lat: 46.6034, lng: 1.8883, offset: 1 },
-            { name: "España", lat: 40.4637, lng: -3.7492, offset: 1 },
-            { name: "Reino Unido", lat: 55.3781, lng: -3.4360, offset: 0 },
-            { name: "Estados Unidos", lat: 37.0902, lng: -95.7129, offset: -5 },
-            { name: "México", lat: 23.6345, lng: -102.5528, offset: -6 }
-        ];
-
-        let map;
-        let marker;
-
-        function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: 0, lng: 0 },
-                zoom: 2
-            });
-
-            marker = new google.maps.Marker({
-                map: map,
-                icon: 'santa.png'
-            });
-
-            updateSantaLocation();
-        }
-
-        function updateSantaLocation() {
-            const now = new Date();
-            const currentHourUTC = now.getUTCHours();
-            const currentCountry = countries.find(country => {
-                return currentHourUTC === (24 + country.offset) % 24;
-            });
-
-            if (currentCountry) {
-                const position = { lat: currentCountry.lat, lng: currentCountry.lng };
-                marker.setPosition(position);
-                map.setCenter(position);
-                document.getElementById('country').textContent = currentCountry.name;
-
-                // Calcular el tiempo restante para México
-                const mexicoOffset = countries.find(c => c.name === 'México').offset;
-                const mexicoTime = new Date(now);
-                mexicoTime.setUTCHours(24 + mexicoOffset);
-                mexicoTime.setMinutes(0);
-                mexicoTime.setSeconds(0);
-                mexicoTime.setMilliseconds(0);
-
-                const timeDiff = mexicoTime - now;
-
-                if (timeDiff > 0) {
-                    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-                    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-                    document.getElementById('countdown').textContent = `${hours} horas y ${minutes} minutos`;
-                } else {
-                    document.getElementById('countdown').textContent = "¡Santa ya ha llegado a México!";
+        const createPayPalButton = (containerId) => {
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: '10.00'
+                            }
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        alert('Pago completado por ' + details.payer.name.given_name);
+                        document.getElementById(containerId).innerHTML = '<p>Pago recibido. ¡Ahora puedes jugar!</p>';
+                    });
                 }
-            }
+            }).render(`#${containerId}`);
+        };
 
-            setTimeout(updateSantaLocation, 60000); // Actualizar cada minuto
-        }
-
-        window.onload = initMap;
+        createPayPalButton('paypal-button-container1');
+        createPayPalButton('paypal-button-container2');
+        // Añadir más llamadas a createPayPalButton aquí para más juegos
     </script>
 </body>
 </html>
