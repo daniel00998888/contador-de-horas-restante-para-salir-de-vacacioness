@@ -36,6 +36,9 @@
             cursor: pointer;
             margin-top: 1em;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -46,12 +49,14 @@
         <div class="game" id="game1">
             <h2>Juego 1</h2>
             <p>Para jugar, paga 10 pesos.</p>
-            <div id="paypal-button-container1"></div>
+            <button class="pay-button" onclick="showPayPalButton('paypal-button-container1')">Jugar</button>
+            <div id="paypal-button-container1" class="hidden"></div>
         </div>
         <div class="game" id="game2">
             <h2>Juego 2</h2>
             <p>Para jugar, paga 10 pesos.</p>
-            <div id="paypal-button-container2"></div>
+            <button class="pay-button" onclick="showPayPalButton('paypal-button-container2')">Jugar</button>
+            <div id="paypal-button-container2" class="hidden"></div>
         </div>
         <!-- Añadir más juegos aquí -->
     </div>
@@ -77,9 +82,11 @@
             }).render(`#${containerId}`);
         };
 
-        createPayPalButton('paypal-button-container1');
-        createPayPalButton('paypal-button-container2');
-        // Añadir más llamadas a createPayPalButton aquí para más juegos
+        const showPayPalButton = (containerId) => {
+            const container = document.getElementById(containerId);
+            container.classList.remove('hidden');
+            createPayPalButton(containerId);
+        };
     </script>
 </body>
 </html>
