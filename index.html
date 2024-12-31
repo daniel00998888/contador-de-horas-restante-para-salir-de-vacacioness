@@ -3,87 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escena 3D en Primera Persona</title>
+    <title>Contador de Año Nuevo</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('https://example.com/tu-imagen-de-fondo.jpg') no-repeat center center/cover;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
         }
-        canvas {
-            display: block;
+        #countdown {
+            font-size: 4rem;
+        }
+        #newYearMessage {
+            display: none;
+            font-size: 5rem;
+            color: gold;
+        }
+        .firework {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: red;
+            border-radius: 50%;
+            animation: firework-animation 2s ease-out infinite;
+        }
+        @keyframes firework-animation {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-500px) scale(5); opacity: 0; }
         }
     </style>
 </head>
 <body>
-    <script src="three.min.js"></script>
-    <script src="PointerLockControls.js"></script>
+    <div id="countdown"></div>
+    <div id="newYearMessage">¡Feliz Año Nuevo!</div>
     <script>
-        let camera, scene, renderer, controls;
-        let objects = [];
+        const countdownElement = document.getElementById('countdown');
+        const newYearMessage = document.getElementById('newYearMessage');
+        const newYear = new Date('January 1, 2025 00:00:00').getTime();
 
-        init();
-        animate();
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = newYear - now;
 
-        function init() {
-            // Configuración básica de Three.js
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            // Control de primera persona
-            controls = new THREE.PointerLockControls(camera, document.body);
-            scene.add(controls.getObject());
+            countdownElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
 
-            // Configuración del renderizador
-            renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
-
-            // Crear un terreno básico con colinas
-            const geometry = new THREE.PlaneGeometry(1000, 1000, 50, 50);
-            geometry.rotateX(-Math.PI / 2);
-            for (let i = 0; i < geometry.vertices.length; i++) {
-                geometry.vertices[i].y = Math.random() * 10;
+            if (distance < 0) {
+                clearInterval(interval);
+                countdownElement.style.display = 'none';
+                newYearMessage.style.display = 'block';
+                launchFireworks();
             }
-            const material = new THREE.MeshLambertMaterial({ color: 0x00ff00, wireframe: false });
-            const terrain = new THREE.Mesh(geometry, material);
-            scene.add(terrain);
-
-            // Añadir luz ambiental y direccional
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
-
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-            directionalLight.position.set(100, 100, 100).normalize();
-            scene.add(directionalLight);
-
-            // Evento para bloquear el puntero
-            document.addEventListener('click', () => {
-                controls.lock();
-            });
-
-            window.addEventListener('resize', onWindowResize);
-
-            // Añadir un cielo
-            const skyGeometry = new THREE.SphereGeometry(500, 60, 40);
-            const skyMaterial = new THREE.MeshBasicMaterial({
-                color: 0x87CEEB,
-                side: THREE.BackSide
-            });
-            const sky = new THREE.Mesh(skyGeometry, skyMaterial);
-            scene.add(sky);
         }
 
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        function launchFireworks() {
+            for (let i = 0; i < 100; i++) {
+                createFirework();
+            }
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
+        function createFirework() {
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            firework.style.left = `${Math.random() * 100}vw`;
+            firework.style.top = `${Math.random() * 100}vh`;
+            document.body.appendChild(firework);
+            setTimeout(() => firework.remove(), 2000);
         }
+
+        const interval = setInterval(updateCountdown, 1000);
     </script>
 </body>
 </html>
