@@ -17,14 +17,35 @@
             color: white;
             text-align: center;
         }
+
+        /* Fondo difuminado */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: inherit;
+            filter: blur(8px);
+            z-index: -1;
+        }
+
+        #countdownContainer {
+            z-index: 1;
+            text-align: center;
+        }
+
         #countdown {
             font-size: 4rem;
         }
+
         #newYearMessage {
             display: none;
             font-size: 5rem;
             color: gold;
         }
+
         .firework {
             position: absolute;
             width: 3px;
@@ -33,6 +54,7 @@
             border-radius: 50%;
             animation: firework-animation 2s ease-out infinite;
         }
+
         @keyframes firework-animation {
             0% { transform: translateY(0) scale(1); opacity: 1; }
             100% { transform: translateY(-500px) scale(5); opacity: 0; }
@@ -40,10 +62,15 @@
     </style>
 </head>
 <body>
-    <div id="countdown"></div>
-    <div id="newYearMessage">¡Feliz Año Nuevo!</div>
+    <div id="countdownContainer">
+        <div id="countdownText">Tiempo restante para Año Nuevo:</div>
+        <div id="countdown"></div>
+        <div id="newYearMessage">¡Feliz Año Nuevo!</div>
+    </div>
+
     <script>
         const countdownElement = document.getElementById('countdown');
+        const countdownText = document.getElementById('countdownText');
         const newYearMessage = document.getElementById('newYearMessage');
         const newYear = new Date('January 1, 2025 00:00:00').getTime();
 
@@ -61,6 +88,7 @@
             if (distance < 0) {
                 clearInterval(interval);
                 countdownElement.style.display = 'none';
+                countdownText.style.display = 'none';
                 newYearMessage.style.display = 'block';
                 launchFireworks();
             }
