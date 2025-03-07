@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VPN Básica</title>
+    <title>Antivirus Simple</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,30 +13,23 @@
             height: 100vh;
             background-color: #f5f5f5;
         }
-        .vpn-container {
+        .antivirus-container {
             width: 400px;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 5px;
             overflow: hidden;
         }
-        .vpn-header {
+        .antivirus-header {
             background-color: #4CAF50;
             color: white;
             padding: 10px;
             text-align: center;
         }
-        .vpn-content {
+        .antivirus-content {
             padding: 20px;
         }
-        .vpn-input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .vpn-button {
+        .antivirus-button {
             width: 100%;
             padding: 10px;
             background-color: #4CAF50;
@@ -45,34 +38,54 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        .antivirus-log {
+            margin-top: 20px;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            height: 150px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
-    <div class="vpn-container">
-        <div class="vpn-header">
-            Conexión VPN Básica
+    <div class="antivirus-container">
+        <div class="antivirus-header">
+            Antivirus Simple
         </div>
-        <div class="vpn-content">
-            <input type="text" id="server-address" class="vpn-input" placeholder="Dirección del servidor VPN">
-            <input type="text" id="username" class="vpn-input" placeholder="Nombre de usuario">
-            <input type="password" id="password" class="vpn-input" placeholder="Contraseña">
-            <button class="vpn-button" onclick="connectVPN()">Conectar</button>
+        <div class="antivirus-content">
+            <button class="antivirus-button" onclick="scanDevice()">Escanear Dispositivo</button>
+            <div class="antivirus-log" id="antivirus-log"></div>
         </div>
     </div>
     <script>
-        function connectVPN() {
-            const serverAddress = document.getElementById('server-address').value;
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        async function scanDevice() {
+            const log = document.getElementById('antivirus-log');
+            log.innerHTML = 'Iniciando el escaneo...<br>';
 
-            if (!serverAddress || !username || !password) {
-                alert('Por favor, completa todos los campos.');
-                return;
+            // Simulación del escaneo
+            const files = ['file1.txt', 'file2.doc', 'file3.pdf'];
+            const virusSignatures = ['virus1', 'virus2', 'virus3'];
+            let foundViruses = 0;
+
+            for (const file of files) {
+                log.innerHTML += `Escaneando ${file}...<br>`;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Simular tiempo de escaneo
+
+                const containsVirus = virusSignatures.some(signature => file.includes(signature));
+                if (containsVirus) {
+                    log.innerHTML += `¡Archivo infectado encontrado: ${file}!<br>`;
+                    foundViruses++;
+                } else {
+                    log.innerHTML += `${file} está limpio.<br>`;
+                }
             }
 
-            // Aquí agregarías la lógica para conectarte a un servidor VPN
-            // Esta es una simulación de conexión para propósitos de demostración
-            alert(`Conectando a VPN en ${serverAddress} como ${username}...`);
+            if (foundViruses === 0) {
+                log.innerHTML += 'No se encontraron archivos infectados.<br>';
+            } else {
+                log.innerHTML += `Escaneo completado. Se encontraron ${foundViruses} archivos infectados.<br>`;
+            }
         }
     </script>
 </body>
