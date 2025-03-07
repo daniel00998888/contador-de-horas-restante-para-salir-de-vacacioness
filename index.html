@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antivirus Simple</title>
+    <title>Información del Dispositivo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,23 +13,23 @@
             height: 100vh;
             background-color: #f5f5f5;
         }
-        .antivirus-container {
+        .info-container {
             width: 400px;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 5px;
             overflow: hidden;
         }
-        .antivirus-header {
+        .info-header {
             background-color: #4CAF50;
             color: white;
             padding: 10px;
             text-align: center;
         }
-        .antivirus-content {
+        .info-content {
             padding: 20px;
         }
-        .antivirus-button {
+        .info-button {
             width: 100%;
             padding: 10px;
             background-color: #4CAF50;
@@ -38,7 +38,7 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .antivirus-log {
+        .info-log {
             margin-top: 20px;
             background-color: #f0f0f0;
             padding: 10px;
@@ -49,42 +49,36 @@
     </style>
 </head>
 <body>
-    <div class="antivirus-container">
-        <div class="antivirus-header">
-            Antivirus Simple
+    <div class="info-container">
+        <div class="info-header">
+            Información del Dispositivo
         </div>
-        <div class="antivirus-content">
-            <button class="antivirus-button" onclick="scanDevice()">Escanear Dispositivo</button>
-            <div class="antivirus-log" id="antivirus-log"></div>
+        <div class="info-content">
+            <button class="info-button" onclick="getDeviceInfo()">Mostrar Información</button>
+            <div class="info-log" id="info-log"></div>
         </div>
     </div>
     <script>
-        async function scanDevice() {
-            const log = document.getElementById('antivirus-log');
-            log.innerHTML = 'Iniciando el escaneo...<br>';
+        function getDeviceInfo() {
+            const log = document.getElementById('info-log');
+            log.innerHTML = 'Obteniendo información del dispositivo...<br>';
 
-            // Simulación del escaneo
-            const files = ['file1.txt', 'file2.doc', 'file3.pdf'];
-            const virusSignatures = ['virus1', 'virus2', 'virus3'];
-            let foundViruses = 0;
-
-            for (const file of files) {
-                log.innerHTML += `Escaneando ${file}...<br>`;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Simular tiempo de escaneo
-
-                const containsVirus = virusSignatures.some(signature => file.includes(signature));
-                if (containsVirus) {
-                    log.innerHTML += `¡Archivo infectado encontrado: ${file}!<br>`;
-                    foundViruses++;
-                } else {
-                    log.innerHTML += `${file} está limpio.<br>`;
-                }
-            }
-
-            if (foundViruses === 0) {
-                log.innerHTML += 'No se encontraron archivos infectados.<br>';
-            } else {
-                log.innerHTML += `Escaneo completado. Se encontraron ${foundViruses} archivos infectados.<br>`;
+            const userAgent = navigator.userAgent;
+            const platform = navigator.platform;
+            const resolution = `${screen.width} x ${screen.height}`;
+            const online = navigator.onLine ? "En línea" : "Desconectado";
+            
+            log.innerHTML += `<strong>Nombre del dispositivo:</strong> ${platform}<br>`;
+            log.innerHTML += `<strong>Sistema operativo:</strong> ${userAgent}<br>`;
+            log.innerHTML += `<strong>Resolución de la pantalla:</strong> ${resolution}<br>`;
+            log.innerHTML += `<strong>Estado de la red:</strong> ${online}<br>`;
+            
+            // Mostrar más información de red si es posible
+            if (navigator.connection) {
+                const connection = navigator.connection;
+                log.innerHTML += `<strong>Tipo de conexión:</strong> ${connection.effectiveType}<br>`;
+                log.innerHTML += `<strong>Velocidad de descarga:</strong> ${connection.downlink} Mbps<br>`;
+                log.innerHTML += `<strong>Latencia:</strong> ${connection.rtt} ms<br>`;
             }
         }
     </script>
