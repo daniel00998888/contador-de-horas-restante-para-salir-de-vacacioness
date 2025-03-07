@@ -1,20 +1,83 @@
-import random
-from transformers import pipeline
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .chat-container {
+            width: 400px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .chat-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .chat-input {
+            display: flex;
+            border-top: 1px solid #ddd;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+        }
+        .chat-input button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            Chatbot
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div>¡Hola! Buenas, un gusto en volverte a ver. ¿En qué puedo ayudarte hoy?</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Escribe tu mensaje...">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput.trim() === '') return;
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML += `<div>Tú: ${userInput}</div>`;
+            document.getElementById('user-input').value = '';
 
-# Cargar el modelo y el pipeline de conversación
-chatbot = pipeline("conversational", model="microsoft/DialoGPT-medium")
-
-# Definir algunas respuestas cordiales
-greetings = ["¡Hola! Buenas, un gusto en volverte a ver. ¿En qué puedo ayudarte hoy?",
-             "¡Hola de nuevo! ¿Cómo puedo asistirte hoy?",
-             "¡Hola! Espero que estés teniendo un buen día. ¿En qué puedo ayudarte?"]
-
-if __name__ == "__main__":
-    print(random.choice(greetings))
-    while True:
-        user_input = input("Tú: ")
-        if user_input.lower() in ['salir', 'adiós', 'chao']:
-            print("¡Hasta luego! Fue un placer ayudarte.")
-            break
-        response = chatbot(user_input)
-        print("IA: " + response[0]['generated_text'])
+            // Aquí puedes agregar lógica para generar la respuesta del chatbot
+            const responses = [
+                'Lo siento, no entiendo esa pregunta. ¿Puedes reformularla?',
+                'Interesante. ¿Puedes decirme más?',
+                'Déjame buscar más información sobre eso.'
+            ];
+            const botResponse = responses[Math.floor(Math.random() * responses.length)];
+            chatMessages.innerHTML += `<div>IA: ${botResponse}</div>`;
+        }
+    </script>
+</body>
+</html>
