@@ -1,115 +1,20 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contador de Año Nuevo</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: url('https://d36tnp772eyphs.cloudfront.net/blogs/2/2018/12/pinata-mexico-shutterstock_1189721131.jpg') no-repeat center center/cover;
-            font-family: Arial, sans-serif;
-            color: white;
-            text-align: center;
-        }
+import random
+from transformers import pipeline
 
-        /* Fondo difuminado */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: inherit;
-            filter: blur(8px);
-            z-index: -1;
-        }
+# Cargar el modelo y el pipeline de conversación
+chatbot = pipeline("conversational", model="microsoft/DialoGPT-medium")
 
-        #countdownContainer {
-            z-index: 1;
-            text-align: center;
-        }
+# Definir algunas respuestas cordiales
+greetings = ["¡Hola! Buenas, un gusto en volverte a ver. ¿En qué puedo ayudarte hoy?",
+             "¡Hola de nuevo! ¿Cómo puedo asistirte hoy?",
+             "¡Hola! Espero que estés teniendo un buen día. ¿En qué puedo ayudarte?"]
 
-        #countdown {
-            font-size: 4rem;
-        }
-
-        #newYearMessage {
-            display: none;
-            font-size: 5rem;
-            color: gold;
-        }
-
-        .firework {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: red;
-            border-radius: 50%;
-            animation: firework-animation 2s ease-out infinite;
-        }
-
-        @keyframes firework-animation {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-500px) scale(5); opacity: 0; }
-        }
-    </style>
-</head>
-<body>
-    <div id="countdownContainer">
-        <div id="countdownText">Tiempo restante para Año Nuevo:</div>
-        <div id="countdown"></div>
-        <div id="newYearMessage">¡Feliz Año Nuevo!</div>
-    </div>
-
-    <script>
-        const countdownElement = document.getElementById('countdown');
-        const countdownText = document.getElementById('countdownText');
-        const newYearMessage = document.getElementById('newYearMessage');
-        const newYear = new Date('January 1, 2025 00:00:00').getTime();
-
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const distance = newYear - now;
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            countdownElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-            if (distance < 0) {
-                clearInterval(interval);
-                countdownElement.style.display = 'none';
-                countdownText.style.display = 'none';
-                newYearMessage.style.display = 'block';
-                launchFireworks();
-            }
-        }
-
-        function launchFireworks() {
-            for (let i = 0; i < 100; i++) {
-                createFirework();
-            }
-        }
-
-        function createFirework() {
-            const firework = document.createElement('div');
-            firework.className = 'firework';
-            firework.style.left = `${Math.random() * 100}vw`;
-            firework.style.top = `${Math.random() * 100}vh`;
-            document.body.appendChild(firework);
-            setTimeout(() => firework.remove(), 2000);
-        }
-
-        const interval = setInterval(updateCountdown, 1000);
-    </script>
-</body>
-</html>
+if __name__ == "__main__":
+    print(random.choice(greetings))
+    while True:
+        user_input = input("Tú: ")
+        if user_input.lower() in ['salir', 'adiós', 'chao']:
+            print("¡Hasta luego! Fue un placer ayudarte.")
+            break
+        response = chatbot(user_input)
+        print("IA: " + response[0]['generated_text'])
