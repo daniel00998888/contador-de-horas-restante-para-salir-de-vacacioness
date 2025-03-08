@@ -11,40 +11,79 @@
             text-align: center;
             padding: 20px;
         }
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+        }
+        .balance {
+            font-size: 24px;
+            margin: 20px;
+        }
+        .games {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
         .game {
             margin: 20px;
             padding: 20px;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 200px;
+        }
+        button {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
-    <h1>Bienvenido al Casino en Línea</h1>
-    <div id="slot-machine" class="game">
-        <h2>Máquina Tragamonedas</h2>
-        <button onclick="spin()">Girar</button>
-        <p id="result"></p>
+    <div class="header">
+        <h1>Bienvenido al Casino en Línea</h1>
+        <div class="balance">Saldo: <span id="balance">100000000</span></div>
+    </div>
+    <div class="games" id="games">
+        <!-- Los juegos se añadirán aquí mediante JavaScript -->
     </div>
 
     <script>
-        const symbols = ['🍒', '🍋', '🍉', '🔔', '⭐'];
+        const balanceElement = document.getElementById('balance');
+        let balance = 100000000;
 
-        function spin() {
-            const result = [];
-            for (let i = 0; i < 3; i++) {
-                result.push(symbols[Math.floor(Math.random() * symbols.length)]);
-            }
-            document.getElementById('result').innerText = result.join(' ');
-            checkWin(result);
+        function updateBalance(amount) {
+            balance += amount;
+            balanceElement.innerText = balance;
         }
 
-        function checkWin(result) {
-            const uniqueSymbols = new Set(result);
-            const message = uniqueSymbols.size === 1 ? '¡Ganaste!' : 'Intenta de nuevo';
-            document.getElementById('result').innerText += ` - ${message}`;
+        function createGame(name, playFunction) {
+            const gameDiv = document.createElement('div');
+            gameDiv.className = 'game';
+            gameDiv.innerHTML = `<h2>${name}</h2><button onclick="${playFunction}()">Jugar</button>`;
+            document.getElementById('games').appendChild(gameDiv);
         }
+
+        function playGame1() {
+            const result = Math.random() < 0.5 ? -10000 : 10000;
+            updateBalance(result);
+            alert(result > 0 ? '¡Ganaste!' : 'Perdiste');
+        }
+
+        for (let i = 1; i <= 20; i++) {
+            createGame(`Juego ${i}`, `playGame${i}`);
+        }
+
+        window.playGame1 = playGame1;
+
+        // Repite esta parte para añadir más juegos (playGame2, playGame3, etc.)
     </script>
 </body>
 </html>
