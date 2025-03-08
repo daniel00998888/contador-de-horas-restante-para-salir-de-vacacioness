@@ -3,83 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Información del Dispositivo</title>
+    <title>Casino en Línea</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f5f5f5;
-        }
-        .info-container {
-            width: 400px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .info-header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
+            background-color: #f4f4f4;
             text-align: center;
-        }
-        .info-content {
             padding: 20px;
         }
-        .info-button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .info-log {
-            margin-top: 20px;
-            background-color: #f0f0f0;
-            padding: 10px;
-            border-radius: 5px;
-            height: 150px;
-            overflow-y: auto;
+        .game {
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
-    <div class="info-container">
-        <div class="info-header">
-            Información del Dispositivo
-        </div>
-        <div class="info-content">
-            <button class="info-button" onclick="getDeviceInfo()">Mostrar Información</button>
-            <div class="info-log" id="info-log"></div>
-        </div>
+    <h1>Bienvenido al Casino en Línea</h1>
+    <div id="slot-machine" class="game">
+        <h2>Máquina Tragamonedas</h2>
+        <button onclick="spin()">Girar</button>
+        <p id="result"></p>
     </div>
-    <script>
-        function getDeviceInfo() {
-            const log = document.getElementById('info-log');
-            log.innerHTML = 'Obteniendo información del dispositivo...<br>';
 
-            const userAgent = navigator.userAgent;
-            const platform = navigator.platform;
-            const resolution = `${screen.width} x ${screen.height}`;
-            const online = navigator.onLine ? "En línea" : "Desconectado";
-            
-            log.innerHTML += `<strong>Nombre del dispositivo:</strong> ${platform}<br>`;
-            log.innerHTML += `<strong>Sistema operativo:</strong> ${userAgent}<br>`;
-            log.innerHTML += `<strong>Resolución de la pantalla:</strong> ${resolution}<br>`;
-            log.innerHTML += `<strong>Estado de la red:</strong> ${online}<br>`;
-            
-            // Mostrar más información de red si es posible
-            if (navigator.connection) {
-                const connection = navigator.connection;
-                log.innerHTML += `<strong>Tipo de conexión:</strong> ${connection.effectiveType}<br>`;
-                log.innerHTML += `<strong>Velocidad de descarga:</strong> ${connection.downlink} Mbps<br>`;
-                log.innerHTML += `<strong>Latencia:</strong> ${connection.rtt} ms<br>`;
+    <script>
+        const symbols = ['🍒', '🍋', '🍉', '🔔', '⭐'];
+
+        function spin() {
+            const result = [];
+            for (let i = 0; i < 3; i++) {
+                result.push(symbols[Math.floor(Math.random() * symbols.length)]);
             }
+            document.getElementById('result').innerText = result.join(' ');
+            checkWin(result);
+        }
+
+        function checkWin(result) {
+            const uniqueSymbols = new Set(result);
+            const message = uniqueSymbols.size === 1 ? '¡Ganaste!' : 'Intenta de nuevo';
+            document.getElementById('result').innerText += ` - ${message}`;
         }
     </script>
 </body>
