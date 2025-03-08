@@ -3,87 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casino en Línea</title>
+    <title>Simulador de Criptomoneda</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .container {
+            width: 800px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
             padding: 20px;
         }
         .header {
-            background-color: #333;
-            color: white;
-            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
         }
-        .balance {
-            font-size: 24px;
-            margin: 20px;
-        }
-        .games {
+        .buttons {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
-        .game {
-            margin: 20px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 200px;
-        }
-        button {
-            padding: 10px;
-            background-color: #28a745;
+        .button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #218838;
+        .button.sell {
+            background-color: #f44336;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Bienvenido al Casino en Línea</h1>
-        <div class="balance">Saldo: <span id="balance">100000000</span></div>
+    <div class="container">
+        <div class="header">
+            <h1>Simulador de Criptomoneda</h1>
+            <h2>Precio Actual: <span id="price">1000</span> USD</h2>
+        </div>
+        <div class="buttons">
+            <button class="button buy" onclick="buy()">Comprar</button>
+            <button class="button sell" onclick="sell()">Vender</button>
+        </div>
+        <canvas id="chart" width="800" height="400"></canvas>
     </div>
-    <div class="games" id="games">
-        <!-- Los juegos se añadirán aquí mediante JavaScript -->
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const balanceElement = document.getElementById('balance');
-        let balance = 100000000;
+        const ctx = document.getElementById('chart').getContext('2d');
+        let price = 1000;
+        let prices = [price];
+        let buyDemand = 0;
+        let sellDemand = 0;
 
-        function updateBalance(amount) {
-            balance += amount;
-            balanceElement.innerText = balance;
+        const chart = new Chart(ctx, {
+            type: 'line', // Using line chart as a simplified example
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Precio de la Criptomoneda',
+                    data: prices,
+                    borderColor: 'green',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'second'
+                        }
+                    }
+                }
+            }
+        });
+
+        function updatePrice() {
+            const demandFactor = 1 + (buyDemand - sellDemand) * 0.001;
+            price = Math.max(1, price * demandFactor); // Ensure price doesn't go below 1
+            prices.push(price);
+
+            chart.data.labels.push(new Date());
+            chart.data.datasets[0].data.push(price);
+            chart.update();
+
+            document.getElementById('price').innerText = price.toFixed(2);
+
+            buyDemand = 0;
+            sellDemand = 0;
+
+            setTimeout(updatePrice, 1000);
         }
 
-        function createGame(name, playFunction) {
-            const gameDiv = document.createElement('div');
-            gameDiv.className = 'game';
-            gameDiv.innerHTML = `<h2>${name}</h2><button onclick="${playFunction}()">Jugar</button>`;
-            document.getElementById('games').appendChild(gameDiv);
+        function buy() {
+            buyDemand++;
         }
 
-        function playGame1() {
-            const result = Math.random() < 0.5 ? -10000 : 10000;
-            updateBalance(result);
-            alert(result > 0 ? '¡Ganaste!' : 'Perdiste');
+        function sell() {
+            sellDemand++;
         }
 
-        for (let i = 1; i <= 20; i++) {
-            createGame(`Juego ${i}`, `playGame${i}`);
-        }
-
-        window.playGame1 = playGame1;
-
-        // Repite esta parte para añadir más juegos (playGame2, playGame3, etc.)
+        updatePrice();
     </script>
 </body>
 </html>
