@@ -47,7 +47,7 @@
   <div class="wrap">
     <div class="card" role="region" aria-label="Contador de admin abuse">
       <h1>Contador para admin abuse</h1>
-      <p class="lead">Cuenta regresiva hasta el próximo admin abuse
+      <p class="lead">Cuenta regresiva hasta el próximo admin abuse programado. Eventos semanales: <strong>Martes 13:00</strong> (Martes de tacos) y <strong>Sábado 15:00</strong>.</p>
 
       <div class="when">
         <div class="badge" id="nextEventLabel">Calculando...</div>
@@ -72,12 +72,23 @@
           <span class="label">Segundos</span>
         </div>
       </div>
-      
+
+      <div class="footer">
+        <div class="small">Zona horaria del navegador (asegúrate que sea la tuya)</div>
+        <div class="small" id="tzInfo"></div>
+      </div>
+
+      <div class="note">
+        Si quieres cambiar horarios o agregar otro evento, puedes editar las constantes en el código JS dentro de este archivo.
+      </div>
+    </div>
+  </div>
+
   <script>
     // CONFIGURACIÓN: eventos semanales
     // weekday: 0=Domingo,1=Lunes,2=Martes,...,6=Sábado
     const EVENTS = [
-      { name: "Martes de tacos", weekday: 2, hour: 16, minute: 0 }, // martes 13:00
+      { name: "Martes de tacos", weekday: 2, hour: 13, minute: 0 }, // martes 13:00
       { name: "Sábado", weekday: 6, hour: 13, minute: 0 }           // sábado 15:00
     ];
 
@@ -172,5 +183,3 @@
   </script>
 </body>
 </html>
-
-
