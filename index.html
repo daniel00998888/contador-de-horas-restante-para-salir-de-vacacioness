@@ -1,117 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Contador - Admin Abuse</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Tienda en GitHub</title>
   <style>
-    body{margin:0;font-family:sans-serif;background:#0f1724;color:#e6eef6;display:flex;justify-content:center;align-items:center;height:100vh}
-    .card{background:#1b2539;padding:20px;border-radius:12px;max-width:400px;width:100%;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
-    h1{margin:0 0 10px}
-    .badge{display:inline-block;margin:10px 0;padding:6px 12px;border-radius:8px;background:#24314d;font-weight:600}
-    .countdown{display:flex;justify-content:space-between;gap:8px;margin-top:10px}
-    .segment{flex:1;background:#24314d;padding:10px;border-radius:8px}
-    .number{font-size:20px;font-weight:bold;color:#22c55e}
-    .label{font-size:12px;color:#9aa5b1}
-    #statusMessage{margin-top:15px;font-size:16px;font-weight:600;color:#22c55e}
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    .producto { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+    form { max-width: 400px; margin-top: 30px; }
+    input, textarea, button {
+      width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px;
+    }
+    button { background: #28a745; color: white; cursor: pointer; }
+    button:hover { background: #218838; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Contador Admin Abuse</h1>
-    <div class="badge" id="nextEventLabel">Calculando...</div>
-    <div class="countdown" id="countdown">
-      <div class="segment"><div class="number" id="days">0</div><div class="label">Días</div></div>
-      <div class="segment"><div class="number" id="hours">0</div><div class="label">Horas</div></div>
-      <div class="segment"><div class="number" id="minutes">0</div><div class="label">Minutos</div></div>
-      <div class="segment"><div class="number" id="seconds">0</div><div class="label">Segundos</div></div>
-    </div>
-    <div id="statusMessage"></div>
+
+  <h1>Bienvenido a mi Tienda</h1>
+  <p>Aquí puedes ver productos y enviarme un mensaje con tu pedido.</p>
+
+  <div class="producto">
+    <h2>Producto 1</h2>
+    <p>Precio: $10</p>
   </div>
 
-  <script>
-    // Eventos semanales
-    const EVENTS = [
-      { name: "Martes de tacos", weekday: 2, hour: 13, minute: 0 }, // martes 13:00
-      { name: "Sábado", weekday: 6, hour: 13, minute: 0 }           // sábado 15:00
-    ];
-    const EVENT_DURATION = 40 * 60 * 1000; // 40 minutos en ms
+  <div class="producto">
+    <h2>Producto 2</h2>
+    <p>Precio: $20</p>
+  </div>
 
-    function getNextWeekly(weekday,hour,minute){
-      const now=new Date();
-      const result=new Date(now);
-      const daysUntil=(weekday+7-now.getDay())%7;
-      result.setDate(now.getDate()+daysUntil);
-      result.setHours(hour,minute,0,0);
-      if(result<=now){result.setDate(result.getDate()+7);}
-      return result;
-    }
+  <h2>📩 Contáctame</h2>
+  <form action="https://formspree.io/f/xdklqpzw" method="POST">
+    <input type="text" name="nombre" placeholder="Tu nombre" required>
+    <input type="email" name="email" placeholder="Tu correo" required>
+    <textarea name="mensaje" placeholder="Escribe tu mensaje o pedido aquí" rows="5" required></textarea>
+    <button type="submit">Enviar mensaje</button>
+  </form>
 
-    function pickNextEvent(){
-      const nexts=EVENTS.map(ev=>({ev,date:getNextWeekly(ev.weekday,ev.hour,ev.minute)}));
-      nexts.sort((a,b)=>a.date-b.date);
-      return nexts[0];
-    }
-
-    const daysEl=document.getElementById("days");
-    const hoursEl=document.getElementById("hours");
-    const minutesEl=document.getElementById("minutes");
-    const secondsEl=document.getElementById("seconds");
-    const nextEventLabel=document.getElementById("nextEventLabel");
-    const statusMessage=document.getElementById("statusMessage");
-    const countdownDiv=document.getElementById("countdown");
-
-    function pad(n){return String(n).padStart(2,"0");}
-
-    let currentTarget=pickNextEvent();
-    let targetDate=currentTarget.date;
-    let eventEndDate=new Date(targetDate.getTime()+EVENT_DURATION);
-
-    function updateHeader(){
-      nextEventLabel.textContent=currentTarget.ev.name+" ("+targetDate.toLocaleString()+")";
-    }
-
-    function updateCountdown(){
-      const now=new Date();
-
-      if(now<targetDate){
-        // Falta para iniciar
-        statusMessage.textContent="";
-        countdownDiv.style.display="flex";
-        const diff=targetDate-now;
-        const totalSec=Math.floor(diff/1000);
-        const d=Math.floor(totalSec/86400);
-        const h=Math.floor((totalSec%86400)/3600);
-        const m=Math.floor((totalSec%3600)/60);
-        const s=totalSec%60;
-        daysEl.textContent=d;
-        hoursEl.textContent=pad(h);
-        minutesEl.textContent=pad(m);
-        secondsEl.textContent=pad(s);
-      } else if(now>=targetDate && now<eventEndDate){
-        // Evento en curso
-        countdownDiv.style.display="none";
-        const elapsed=now-targetDate;
-        if(elapsed<5*60*1000){
-          statusMessage.textContent="El evento va iniciando";
-        } else if(elapsed<(EVENT_DURATION-5*60*1000)){
-          statusMessage.textContent="El evento ha iniciado";
-        } else{
-          statusMessage.textContent="El evento ha acabado";
-        }
-      } else {
-        // Evento terminó, preparar el siguiente
-        currentTarget=pickNextEvent();
-        targetDate=currentTarget.date;
-        eventEndDate=new Date(targetDate.getTime()+EVENT_DURATION);
-        updateHeader();
-        statusMessage.textContent="";
-        countdownDiv.style.display="flex";
-      }
-    }
-
-    updateHeader();
-    setInterval(updateCountdown,1000);
-  </script>
 </body>
 </html>
