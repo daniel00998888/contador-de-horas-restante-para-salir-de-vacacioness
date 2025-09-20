@@ -1,52 +1,185 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Descarga la Aplicación</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-        }
-        h1 {
-            color: #333;
-            margin-top: 50px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contador - Admin Abuse</title>
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --accent:#22c55e;
+      --muted:#9aa5b1;
+      --glass: rgba(255,255,255,0.03);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#061024 0%, var(--bg) 100%);color:#e6eef6;}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px;box-sizing:border-box;}
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      padding:24px;
+      width:420px;
+      box-shadow:0 8px 30px rgba(2,6,23,0.7);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    h1{margin:0 0 6px 0;font-size:20px;letter-spacing:0.2px}
+    p.lead{margin:0 0 18px 0;color:var(--muted);font-size:13px}
+    .when{display:flex;gap:8px;align-items:center;margin-bottom:18px}
+    .badge{background:var(--glass);padding:8px 12px;border-radius:999px;font-weight:600;font-size:13px;color:var(--muted)}
+    .countdown{display:flex;gap:8px;justify-content:space-between}
+    .segment{flex:1;background:rgba(255,255,255,0.02);padding:14px;border-radius:8px;text-align:center}
+    .number{font-size:22px;font-weight:700;color:var(--accent);display:block}
+    .label{font-size:12px;color:var(--muted);margin-top:6px}
+    .footer{margin-top:16px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+    .small{font-size:12px;color:var(--muted)}
+    .form{margin-top:12px;display:flex;gap:8px}
+    input[type="text"]{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+    button{padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#062016;font-weight:700;cursor:pointer}
+    .note{margin-top:10px;color:var(--muted);font-size:12px}
+    @media(max-width:480px){
+      .card{width:100%}
+      .countdown{flex-direction:column}
+    }
+  </style>
 </head>
 <body>
-    <h1>¡Descarga la Aplicación Aquí!</h1>
-    <button onclick="descargarApp()">Descargar Aplicación</button>
+  <div class="wrap">
+    <div class="card" role="region" aria-label="Contador de admin abuse">
+      <h1>Contador para admin abuse</h1>
+      <p class="lead">Cuenta regresiva hasta el próximo admin abuse programado. Eventos semanales: <strong>Martes 13:00</strong> (Martes de tacos) y <strong>Sábado 15:00</strong>.</p>
 
-    <script>
-        function descargarApp() {
-            // Detectar si el usuario está en móvil o PC
-            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      <div class="when">
+        <div class="badge" id="nextEventLabel">Calculando...</div>
+        <div class="small" id="nextEventTime">—</div>
+      </div>
 
-            if (isMobile) {
-                // Descargar APK para móviles
-                window.location.href = "app/android-version.apk";
-            } else {
-                // Descargar ejecutable para PC
-                window.location.href = "app/desktop-version.exe";
-            }
-        }
-    </script>
+      <div class="countdown" aria-live="polite">
+        <div class="segment">
+          <span class="number" id="days">0</span>
+          <span class="label">Días</span>
+        </div>
+        <div class="segment">
+          <span class="number" id="hours">0</span>
+          <span class="label">Horas</span>
+        </div>
+        <div class="segment">
+          <span class="number" id="minutes">0</span>
+          <span class="label">Minutos</span>
+        </div>
+        <div class="segment">
+          <span class="number" id="seconds">0</span>
+          <span class="label">Segundos</span>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="small">Zona horaria del navegador (asegúrate que sea la tuya)</div>
+        <div class="small" id="tzInfo"></div>
+      </div>
+
+      <div class="note">
+        Si quieres cambiar horarios o agregar otro evento, puedes editar las constantes en el código JS dentro de este archivo.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // CONFIGURACIÓN: eventos semanales
+    // weekday: 0=Domingo,1=Lunes,2=Martes,...,6=Sábado
+    const EVENTS = [
+      { name: "Martes de tacos", weekday: 2, hour: 13, minute: 0 }, // martes 13:00
+      { name: "Sábado", weekday: 6, hour: 15, minute: 0 }           // sábado 15:00
+    ];
+
+    // Obtiene la próxima fecha para un día/ hora semanales dado
+    function getNextWeekly(weekday, hour, minute) {
+      const now = new Date();
+      // fecha base con la hora deseada
+      const result = new Date(now);
+      // calcula cuántos días sumar
+      const daysUntil = (weekday + 7 - now.getDay()) % 7;
+      result.setDate(now.getDate() + daysUntil);
+      result.setHours(hour, minute, 0, 0);
+      // si la fecha resultante ya pasó (es el mismo día pero hora menor), sumar 7 días
+      if (result <= now) {
+        result.setDate(result.getDate() + 7);
+      }
+      return result;
+    }
+
+    function pickNextEvent() {
+      const nexts = EVENTS.map(ev => {
+        return {
+          ev,
+          date: getNextWeekly(ev.weekday, ev.hour, ev.minute)
+        };
+      });
+
+      // escoger el más cercano (fecha más pequeña)
+      nexts.sort((a,b) => a.date - b.date);
+      return nexts[0]; // objeto con {ev, date}
+    }
+
+    // Rendereo/actualización del contador
+    const daysEl = document.getElementById("days");
+    const hoursEl = document.getElementById("hours");
+    const minutesEl = document.getElementById("minutes");
+    const secondsEl = document.getElementById("seconds");
+    const nextEventLabel = document.getElementById("nextEventLabel");
+    const nextEventTime = document.getElementById("nextEventTime");
+    const tzInfo = document.getElementById("tzInfo");
+
+    function pad(n){ return String(n).padStart(2,"0"); }
+
+    let currentTarget = pickNextEvent(); // primer objetivo
+    let targetDate = currentTarget.date;
+
+    function updateHeader() {
+      const ev = currentTarget.ev;
+      nextEventLabel.textContent = ev.name;
+      // Mostrar día y hora legible
+      const opts = { weekday:"long", year:"numeric", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" };
+      nextEventTime.textContent = targetDate.toLocaleString(undefined, opts);
+      // mostrar zona del navegador
+      try {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        tzInfo.textContent = tz;
+      } catch {
+        tzInfo.textContent = (new Date()).toString().match(/\([^)]*\)/) || "";
+      }
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      let diff = Math.max(0, targetDate - now); // ms
+      if (diff <= 0) {
+        // Llegó el evento: recalcular el siguiente
+        currentTarget = pickNextEvent(); // recalcula usando la lista (importante para avanzar al siguiente)
+        targetDate = currentTarget.date;
+        updateHeader();
+        diff = Math.max(0, targetDate - new Date());
+      }
+
+      const totalSec = Math.floor(diff / 1000);
+      const days = Math.floor(totalSec / (24*3600));
+      const hours = Math.floor((totalSec % (24*3600)) / 3600);
+      const minutes = Math.floor((totalSec % 3600) / 60);
+      const seconds = totalSec % 60;
+
+      daysEl.textContent = days;
+      hoursEl.textContent = pad(hours);
+      minutesEl.textContent = pad(minutes);
+      secondsEl.textContent = pad(seconds);
+    }
+
+    // Inicializar
+    updateHeader();
+    updateCountdown();
+    // Actualizar cada segundo
+    setInterval(updateCountdown, 1000);
+
+    // Si cambias el arreglo EVENTS en el código, el contador adaptará automáticamente el próximo evento.
+  </script>
 </body>
 </html>
